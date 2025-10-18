@@ -2,22 +2,31 @@ package service;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import conf.Configuracion;
+import dto.Event;
 import dto.Odd;
+import exchange.PriceSize;
+import exchange.Runner;
 import telegram.TelegramSender;
 import utils.DatosPruebasUtils;
 import utils.OddUtils;
@@ -189,7 +198,7 @@ public class NinjaService {
 	    }
 	 
 	 
-	 private static StringBuilder crearPeticionData(String urlParameters, String urlConexion) {
+	 public static StringBuilder crearPeticionData(String urlParameters, String urlConexion) {
 	    	StringBuilder response = new StringBuilder();
 	        try {
 	    	byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
@@ -247,5 +256,240 @@ public class NinjaService {
 	    	
 	    }
 	 
+	 
+		public static List<Event> buscaEventos(String nombreEvento) {
 
+			List<Event> eventos = new ArrayList<Event>();
+
+			try {
+				StringBuilder peticionEventos = crearPeticionEvents(nombreEvento);
+				System.out.println(peticionEventos.toString());
+
+				eventos = mapearListaResultadosEvents(peticionEventos.toString());
+
+				String codigosEventos = "";
+
+				if (!eventos.isEmpty()) {
+					for (Event event : eventos) {
+						codigosEventos += event.getId() + ",";
+					}
+
+					codigosEventos = codigosEventos.substring(0, codigosEventos.length() - 1);
+				}
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+
+			return eventos;
+
+		}
+	 
+	    public static StringBuilder crearPeticionEvents(String name) throws IOException {
+	        // Montar parámetros POST
+	        String urlParameters = "name=" + URLEncoder.encode(name, "UTF-8");
+
+	        // Preparar la conexión
+	        URL url = new URL(Configuracion.urlEvents);
+	        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+	        conn.setRequestMethod("POST");
+
+	        // Headers principales
+	        conn.setRequestProperty("Accept", "application/json, text/javascript, */*; q=0.01");
+	        conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+	        conn.setRequestProperty("Origin", "https://www.ninjabet.es");
+	        conn.setRequestProperty("Referer", "https://www.ninjabet.es/oddsmatcher");
+	        conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36");
+	        conn.setRequestProperty("X-Requested-With", "XMLHttpRequest");
+	        //conn.setRequestProperty("Cookie", cookies);
+
+	        // Permitir envío de datos
+	        conn.setDoOutput(true);
+
+	        // Enviar body POST
+	        try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream())) {
+	            wr.write(urlParameters.getBytes(StandardCharsets.UTF_8));
+	        }
+
+	        // Leer respuesta
+	        int responseCode = conn.getResponseCode();
+	        InputStream inputStream = (responseCode == 200)
+	                ? conn.getInputStream()
+	                : conn.getErrorStream();
+
+	        BufferedReader in = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+	        StringBuilder response = new StringBuilder();
+	        String line;
+	        while ((line = in.readLine()) != null) {
+	            response.append(line);
+	        }
+	        in.close();
+
+	        return response;
+	    }
+	    
+	    
+	    public static List<Event> mapearListaResultadosEvents(String json) throws Exception {
+	        ObjectMapper objectMapper = new ObjectMapper();
+	        return objectMapper.readValue(json, new TypeReference<List<Event>>(){});
+	    }
+	    
+	    
+	    
+		public static Odd rellenaMejoresHome(Odd odd, String codigosEventos) throws Exception {
+			
+			ArrayList<Odd> lectura = new ArrayList<>();
+			
+			String urlParameters=NinjaService.crearUrlFiltroPeticionData(Configuracion.uid, Configuracion.filtroBookies2UP2WAY, "1", "1", Configuracion.filtroApuestasHome, codigosEventos);
+			lectura=NinjaService.mapearListaResultadosData(urlParameters, Configuracion.urlData);
+	    	lectura.sort(Comparator.comparingDouble(o -> Double.parseDouble(o.getBackOdd())));
+	    	Collections.reverse(lectura);
+			for (Odd o : lectura.subList(0, Math.min(3, lectura.size()))) {
+				odd.setEquipoHome(o.getSelection());
+				odd.getMejoresHome().add(o);
+			}
+			
+			return odd;
+
+		}
+
+		public static Odd rellenaMejoresDraw(Odd odd, String codigosEventos) throws Exception {
+			ArrayList<Odd> lectura = new ArrayList<>();
+			String urlParameters=NinjaService.crearUrlFiltroPeticionData(Configuracion.uid, Configuracion.filtroBookiesVacio, "1", "1", Configuracion.filtroApuestasDraw, codigosEventos);
+			lectura=NinjaService.mapearListaResultadosData(urlParameters, Configuracion.urlData);
+			lectura.sort(Comparator.comparingDouble(o -> Double.parseDouble(o.getBackOdd())));
+	    	Collections.reverse(lectura);
+			for (Odd o : lectura.subList(0, Math.min(3, lectura.size()))) {
+				odd.getMejoresDraw().add(o);
+			}
+			
+			return odd;
+		}
+
+		public static Odd rellenaMejoresAway(Odd odd, String codigosEventos) throws Exception {
+			
+			ArrayList<Odd> lectura = new ArrayList<>();
+						
+			String urlParameters=NinjaService.crearUrlFiltroPeticionData(Configuracion.uid, Configuracion.filtroBookies2UP2WAY, "1", "1", Configuracion.filtroApuestasAway, codigosEventos);
+			lectura=NinjaService.mapearListaResultadosData(urlParameters, Configuracion.urlData);
+			lectura.sort(Comparator.comparingDouble(o -> Double.parseDouble(o.getBackOdd())));
+	    	Collections.reverse(lectura);
+			for (Odd o : lectura.subList(0, Math.min(3, lectura.size()))) {
+				odd.setEquipoAway(o.getSelection());
+				odd.getMejoresAway().add(o);
+			}
+				
+				return odd;
+		}
+
+		public static Odd rellenaDrawExchange(Odd odd) throws Exception {
+
+			
+			//Buscamos la cuota "empate" en betfair exchange
+			String urlParameters=ExchangeService.crearUrlFiltroPeticionExchange(odd.getMarket_id());
+			StringBuilder response= ExchangeService.crearPeticionData(urlParameters, Configuracion.urlExchange);
+			List<Runner> listaExchange=ExchangeService.MapearResultadosExchange(response.toString());
+			
+			Double mejorCuotaDrawExchange=0.0;
+			Double liquidez=0.0;
+			if (listaExchange!=null && !listaExchange.isEmpty()) {
+				for (Runner runner : listaExchange) {
+					if (runner.getDescription().getRunnerName().equalsIgnoreCase("empate")) {
+						List<PriceSize> cuotas = runner.getExchange().getAvailableToBack();
+						if(cuotas!=null && !cuotas.isEmpty()) {
+						for (PriceSize p : cuotas) {
+							if(p.getPrice()>mejorCuotaDrawExchange) {
+								mejorCuotaDrawExchange=p.getPrice();
+								liquidez=p.getSize();
+							}
+							}
+						}
+					}
+				}
+				
+				if(mejorCuotaDrawExchange>0) {
+					Odd ex=new Odd();
+					ex.setBackOddOriginal(mejorCuotaDrawExchange.toString());
+					double reducida=(mejorCuotaDrawExchange-1)*(0.98)+1;
+					Double reducidaRedondeada = Math.round(reducida * 100.0) / 100.0;
+					ex.setBackOdd(reducidaRedondeada.toString());
+					ex.setLayOdd(liquidez.toString());
+					odd.setExchangeDraw(ex);
+				}
+			}
+			
+			return odd;
+			
+		}
+
+		
+		
+	    public static Odd rellenaCuotasTodas(Odd odd) throws Exception {
+	    	
+	       	
+	    	List<Event> eventos=buscaEventos(odd.getEvent());
+	    	
+	    	String codigosEventos="";
+	    	
+			if (!eventos.isEmpty()) {
+				for (Event event : eventos) {
+					codigosEventos += event.getId() + ",";
+				}
+				
+				codigosEventos=codigosEventos.substring(0, codigosEventos.length() - 1);
+			}
+			
+			odd=rellenaMejoresHome(odd, codigosEventos);
+			
+			odd=rellenaMejoresDraw(odd, codigosEventos);			
+		
+			odd=rellenaDrawExchange(odd);
+			
+			odd=rellenaMejoresAway(odd, codigosEventos);
+					
+	    	
+	    	return odd;
+	    }
+	    
+	    public static Odd rellenaCuotasSoloHome(Odd odd) throws Exception {
+	    	
+	       	
+	    	List<Event> eventos=buscaEventos(odd.getEvent());
+	    	
+	    	String codigosEventos="";
+	    	
+			if (!eventos.isEmpty()) {
+				for (Event event : eventos) {
+					codigosEventos += event.getId() + ",";
+				}
+				
+				codigosEventos=codigosEventos.substring(0, codigosEventos.length() - 1);
+			}
+			
+			odd=rellenaMejoresHome(odd, codigosEventos);
+			    	
+	    	return odd;
+	    }
+	    
+	    public static Odd rellenaCuotasSoloAway(Odd odd) throws Exception {
+	    	
+	       	
+	    	List<Event> eventos=buscaEventos(odd.getEvent());
+	    	
+	    	String codigosEventos="";
+	    	
+			if (!eventos.isEmpty()) {
+				for (Event event : eventos) {
+					codigosEventos += event.getId() + ",";
+				}
+				
+				codigosEventos=codigosEventos.substring(0, codigosEventos.length() - 1);
+			}
+			
+			odd=rellenaMejoresAway(odd, codigosEventos);
+					
+	    	
+	    	return odd;
+	    }
+		
+		
 }

@@ -57,21 +57,23 @@ public class ExchangeService {
 	        int responseCode = conn.getResponseCode();
 	        System.out.println("Response Code : " + responseCode);
 	        String code=Integer.valueOf(responseCode).toString();
-	        StringBuilder mensajeDebug = new StringBuilder();
-	        mensajeDebug.append("<b>Debug Ejecucion</b>\n");
+//	        StringBuilder mensajeDebug = new StringBuilder();
+//	        mensajeDebug.append("<b>Debug Ejecucion</b>\n");
 	        
 	        if(responseCode!=200) {
 	        	codeRespuesta=Integer.valueOf(code);
-	        	mensajeDebug.append("resultado Petición HTTP: <b>").append(code).append("</b>\n");
+	        	//mensajeDebug.append("resultado Petición HTTP: <b>").append(code).append("</b>\n");
 	        	//mensajeDebug.append("⚽ <b>").append(code).append("</b>\n");
 	                         	
 	        } else {
 	        	codeRespuesta=200;
-	        	mensajeDebug.append("resultado Petición HTTP: <b>").append(code).append("</b>\n");
+	        	//mensajeDebug.append("resultado Petición HTTP: <b>").append(code).append("</b>\n");
 	        	//mensajeDebug.append("⚽ <b>").append(code).append("</b>\n");
 	        }
 
-	       TelegramSender.sendTelegramMessageDebug(mensajeDebug.toString());	
+	      // TelegramSender.sendTelegramMessageDebug(mensajeDebug.toString());	
+	        
+	        TelegramSender.peticionesAExchange++;
 	        
 	        InputStream is = (responseCode >= 200 && responseCode < 300)
 	                ? conn.getInputStream()

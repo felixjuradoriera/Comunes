@@ -30,7 +30,14 @@ public class TelegramSender {
     private static final String[] CHAT_IDS_VIGILANTE = {"1066152103"}; //<-- este es el chat de lucas
     //private static final String[] CHAT_IDS_VIGILANTE = {"403482161"}; //<-- este soy yo
     
-
+    public static Integer response200_Inicial=0;
+    public static Integer response200_Events=0;
+    public static Integer response200_Adicional=0;
+    public static Integer peticionesAExchange=0;
+    public static Integer response403=0;
+    public static Integer eventosIniciales=0;
+    public static Integer eventosFinales=0;
+    public static Integer alertasEnviadas=0;
     
     /*  ESTE METODO NO SE UTILIZA*/
     public static void sendTelegramMessage(String text) {

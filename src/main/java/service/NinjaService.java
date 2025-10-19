@@ -84,7 +84,7 @@ public class NinjaService {
 	    	return urlFiltro;
 	    }
 	 
-	 public static ArrayList<Odd> mapearListaResultadosData(String filtroPeticion, String urlPeticion) throws JsonMappingException, JsonProcessingException { 
+	 public static ArrayList<Odd> mapearListaResultadosData(String filtroPeticion, String urlPeticion, boolean inicial) throws JsonMappingException, JsonProcessingException { 
 	    	
 	    	
 	    	ArrayList<Odd> lectura=new ArrayList<Odd>();
@@ -99,6 +99,13 @@ public class NinjaService {
 		    	
 		    	
 		    	if(codeRespuesta.intValue()==200) {
+		    		
+		    		if(inicial) {
+		    			TelegramSender.response200_Inicial++;	
+		    		} else {
+		    			TelegramSender.response200_Adicional++;
+		    		}
+		    		
 		    		
 		    		DatosPruebasUtils.guardarJsonEnArchivo(response);
 		    		
@@ -185,6 +192,12 @@ public class NinjaService {
 		    		
 		    		
 		    	} else {
+		    		if(inicial) {
+		    			TelegramSender.response403++;	
+		    		} else {
+		    			TelegramSender.response403++;
+		    		}
+		    		
 		    		hayMasResultados=false;
 	        		TelegramSender.sendTelegramMessageVigilante();
 	        		return null;
@@ -193,7 +206,7 @@ public class NinjaService {
 		    	
 			}
 	    	
-	    	   	
+	    	TelegramSender.eventosIniciales=lectura.size();   	
 	    	return lectura;
 	    	
 	    }
@@ -220,21 +233,21 @@ public class NinjaService {
 	        int responseCode = conn.getResponseCode();
 	        System.out.println("Response Code : " + responseCode);
 	        String code=Integer.valueOf(responseCode).toString();
-	        StringBuilder mensajeDebug = new StringBuilder();
-	        mensajeDebug.append("<b>Debug Ejecucion</b>\n");
+//	        StringBuilder mensajeDebug = new StringBuilder();
+//	        mensajeDebug.append("<b>Debug Ejecucion</b>\n");
 	        
 	        if(responseCode!=200) {
 	        	codeRespuesta=Integer.valueOf(code);
-	        	mensajeDebug.append("resultado Petición HTTP: <b>").append(code).append("</b>\n");
+	        	//mensajeDebug.append("resultado Petición HTTP: <b>").append(code).append("</b>\n");
 	        	//mensajeDebug.append("⚽ <b>").append(code).append("</b>\n");
 	                         	
 	        } else {
 	        	codeRespuesta=200;
-	        	mensajeDebug.append("resultado Petición HTTP: <b>").append(code).append("</b>\n");
+	        	//mensajeDebug.append("resultado Petición HTTP: <b>").append(code).append("</b>\n");
 	        	//mensajeDebug.append("⚽ <b>").append(code).append("</b>\n");
 	        }
 
-	       TelegramSender.sendTelegramMessageDebug(mensajeDebug.toString());	
+	      // TelegramSender.sendTelegramMessageDebug(mensajeDebug.toString());	
 	        
 	        InputStream is = (responseCode >= 200 && responseCode < 300)
 	                ? conn.getInputStream()
@@ -313,6 +326,13 @@ public class NinjaService {
 
 	        // Leer respuesta
 	        int responseCode = conn.getResponseCode();
+	        
+	        if(responseCode==200) {
+	        	TelegramSender.response200_Events++;
+	        } else {
+	        	TelegramSender.response403++;
+	        }
+	        
 	        InputStream inputStream = (responseCode == 200)
 	                ? conn.getInputStream()
 	                : conn.getErrorStream();
@@ -341,7 +361,7 @@ public class NinjaService {
 			ArrayList<Odd> lectura = new ArrayList<>();
 			
 			String urlParameters=NinjaService.crearUrlFiltroPeticionData(Configuracion.uid, Configuracion.filtroBookies2UP2WAY, "1", "1", Configuracion.filtroApuestasHome, codigosEventos);
-			lectura=NinjaService.mapearListaResultadosData(urlParameters, Configuracion.urlData);
+			lectura=NinjaService.mapearListaResultadosData(urlParameters, Configuracion.urlData, false);
 	    	lectura.sort(Comparator.comparingDouble(o -> Double.parseDouble(o.getBackOdd())));
 	    	Collections.reverse(lectura);
 			for (Odd o : lectura.subList(0, Math.min(4, lectura.size()))) {
@@ -361,7 +381,7 @@ public class NinjaService {
 		public static Odd rellenaMejoresDraw(Odd odd, String codigosEventos) throws Exception {
 			ArrayList<Odd> lectura = new ArrayList<>();
 			String urlParameters=NinjaService.crearUrlFiltroPeticionData(Configuracion.uid, Configuracion.filtroBookiesVacio, "1", "1", Configuracion.filtroApuestasDraw, codigosEventos);
-			lectura=NinjaService.mapearListaResultadosData(urlParameters, Configuracion.urlData);
+			lectura=NinjaService.mapearListaResultadosData(urlParameters, Configuracion.urlData, false);
 			lectura.sort(Comparator.comparingDouble(o -> Double.parseDouble(o.getBackOdd())));
 	    	Collections.reverse(lectura);
 	    	for (Odd o : lectura.subList(0, Math.min(4, lectura.size()))) {
@@ -380,7 +400,7 @@ public class NinjaService {
 			ArrayList<Odd> lectura = new ArrayList<>();
 						
 			String urlParameters=NinjaService.crearUrlFiltroPeticionData(Configuracion.uid, Configuracion.filtroBookies2UP2WAY, "1", "1", Configuracion.filtroApuestasAway, codigosEventos);
-			lectura=NinjaService.mapearListaResultadosData(urlParameters, Configuracion.urlData);
+			lectura=NinjaService.mapearListaResultadosData(urlParameters, Configuracion.urlData, false);
 			lectura.sort(Comparator.comparingDouble(o -> Double.parseDouble(o.getBackOdd())));
 	    	Collections.reverse(lectura);
 			for (Odd o : lectura.subList(0, Math.min(4, lectura.size()))) {

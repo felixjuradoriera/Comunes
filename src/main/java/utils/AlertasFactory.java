@@ -4,12 +4,102 @@ import java.util.Map;
 
 import dto.Odd;
 
-public class MessageUtils {
+public class AlertasFactory {
 	
 	
 	
 	
 	public static StringBuilder createAlerta(Odd odd) {
+		
+	 	StringBuilder mensaje = new StringBuilder();
+    	
+		 if(odd.getNivelAlerta()==1) {
+			 mensaje.append("‼️🔥🔥‼️").append("\n");
+		 }
+		 if(odd.getNivelAlerta()==2) {
+			 mensaje.append("‼️‼️🔥🔥🔥🔥🔥🔥‼️‼️").append("\n");
+		 }
+		 mensaje.append("⚽ <b>").append(odd.getEvent()).append("</b>\n");
+		 mensaje.append("🏆 <b>").append(odd.getCompetition()).append(" (").append(odd.getCountry()).append(")</b>\n");
+		 mensaje.append("🗓️ <b>").append(odd.getsFechaPartido()).append("h").append("</b>\n\n");
+		
+		 int bookies=odd.getOddsFusion().size();
+		 for (Odd odFusion : odd.getOddsFusion()) {
+			
+			 if(bookies>1) {
+				 mensaje.append("‼️🔔<u><b> 2UP SIMPLE </b></u>\n");
+			 } else {
+				 mensaje.append("🔔<u><b> 2UP SIMPLE </b></u>\n");	 
+			 }
+			 
+			 mensaje.append("    🏛 <b>").append(getNombreBookie(odFusion.getBookie())).append("</b>\n");
+			 
+			 if (odFusion.getBookie().equals("39")) {
+				 mensaje.append("    📈 <b>").append(odFusion.getRating()).append("%</b> (").append(odFusion.getRatingOriginal()).append(")\n");
+			 } else {
+				 mensaje.append("    📈 <b>").append(odFusion.getRating()).append("%</b>\n");
+			 }
+			             		
+			 mensaje.append("    Ap: <b>").append(odFusion.getSelection()).append("</b>\n");
+			 
+			 if (odFusion.getBookie().equals("39")) {
+				 mensaje.append("    📋 Back: <b>").append(odFusion.getBackOdd()).append("</b> (").append(odFusion.getBackOddOriginal()).append(") | Lay: <b>").append(odFusion.getLayOdd()).append("</b>\n");	 
+			 } else {
+				 mensaje.append("    📋 Back: <b>").append(odFusion.getBackOdd()).append("</b> | Lay: <b>").append(odFusion.getLayOdd()).append("</b>\n"); 
+		   		 }
+		            		 
+			mensaje.append("    ⏱ ").append(odFusion.getUpdate_time()).append("\n");
+			mensaje.append("    🔗 <a href=\"https://www.betfair.es/exchange/football/market?id=").append(odFusion.getMarket_id()).append("\">Ver en Betfair</a>\n\n"); 
+			 
+			 
+		}
+		
+		mensaje.append("🔔<u><b> OTRAS BOOKIES </b></u>\n");
+		
+		if("1".equals(odd.getSelectionId()))
+		{
+			mensaje.append("🟢<b>").append(odd.getEquipoHome()).append("</b>\n");
+			for (Odd o : odd.getMejoresHome()) {
+				 if (o.getBookie().equals("39")) {
+					mensaje.append("     ").append(getNombreBookie(o.getBookie())).append("->").append(o.getBackOdd()).append("(").append(o.getBackOddOriginal()).append(")").append("\n");	 
+				 } else {
+					mensaje.append("     ").append(getNombreBookie(o.getBookie())).append("->").append(o.getBackOdd()).append("\n"); 
+				 }
+			}
+		}
+	
+		if("2".equals(odd.getSelectionId()))
+		{
+			mensaje.append("🟢<b>").append(odd.getEquipoAway()).append("</b>\n");
+			for (Odd o : odd.getMejoresAway()) {
+				if (o.getBookie().equals("39")) {
+					mensaje.append("     ").append(getNombreBookie(o.getBookie())).append("->").append(o.getBackOdd()).append("(").append(o.getBackOddOriginal()).append(")").append("\n");	
+				} else {
+					mensaje.append("     ").append(getNombreBookie(o.getBookie())).append("->").append(o.getBackOdd()).append("\n");
+				}
+			}
+		}
+	
+		
+		 if(odd.getNivelAlerta()==1) {
+			 mensaje.append("‼️🔥🔥‼️").append("\n");
+		 }
+		 if(odd.getNivelAlerta()==2) {
+			 mensaje.append("‼️‼️🔥🔥🔥🔥🔥🔥‼️‼️").append("\n");
+		 }
+		
+		
+		
+		return mensaje;
+		
+		
+		
+	}
+	
+	
+	
+	
+	public static StringBuilder createAlertaOLD(Odd odd) {
 		
 	 	StringBuilder mensaje = new StringBuilder();
     	

@@ -123,6 +123,7 @@ public class NinjaService {
 		                    odd.setUpdate_time(item.path("update_time").asText());
 		                    odd.setCountry(item.path("country").asText());
 		                    odd.setMarket_id(item.path("market_id").asText());
+		                    odd.setSelectionId(item.path("selection_id").asText());
 		                    
 		                    String parteHora = item.path("update_time").asText().split(":")[0];  
 		                    Integer horaEntero = Integer.parseInt(parteHora);
@@ -343,10 +344,15 @@ public class NinjaService {
 			lectura=NinjaService.mapearListaResultadosData(urlParameters, Configuracion.urlData);
 	    	lectura.sort(Comparator.comparingDouble(o -> Double.parseDouble(o.getBackOdd())));
 	    	Collections.reverse(lectura);
-			for (Odd o : lectura.subList(0, Math.min(3, lectura.size()))) {
+			for (Odd o : lectura.subList(0, Math.min(4, lectura.size()))) {
 				odd.setEquipoHome(o.getSelection());
-				odd.getMejoresHome().add(o);
+				if(!o.getBookie().equals(odd.getBookie())) {
+					odd.getMejoresHome().add(o);	
+				}
+				
 			}
+			
+			
 			
 			return odd;
 
@@ -358,8 +364,12 @@ public class NinjaService {
 			lectura=NinjaService.mapearListaResultadosData(urlParameters, Configuracion.urlData);
 			lectura.sort(Comparator.comparingDouble(o -> Double.parseDouble(o.getBackOdd())));
 	    	Collections.reverse(lectura);
-			for (Odd o : lectura.subList(0, Math.min(3, lectura.size()))) {
-				odd.getMejoresDraw().add(o);
+	    	for (Odd o : lectura.subList(0, Math.min(4, lectura.size()))) {
+				odd.setEquipoHome(o.getSelection());
+				if(!o.getBookie().equals(odd.getBookie())) {
+					odd.getMejoresDraw().add(o);	
+				}
+				
 			}
 			
 			return odd;
@@ -373,9 +383,11 @@ public class NinjaService {
 			lectura=NinjaService.mapearListaResultadosData(urlParameters, Configuracion.urlData);
 			lectura.sort(Comparator.comparingDouble(o -> Double.parseDouble(o.getBackOdd())));
 	    	Collections.reverse(lectura);
-			for (Odd o : lectura.subList(0, Math.min(3, lectura.size()))) {
+			for (Odd o : lectura.subList(0, Math.min(4, lectura.size()))) {
 				odd.setEquipoAway(o.getSelection());
-				odd.getMejoresAway().add(o);
+				if(!o.getBookie().equals(odd.getBookie())) {
+					odd.getMejoresAway().add(o);	
+				}
 			}
 				
 				return odd;

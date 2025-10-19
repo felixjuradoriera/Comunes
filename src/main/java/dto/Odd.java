@@ -12,6 +12,7 @@ public class Odd {
         private String backOdd;
         private String layOdd;
         private String selection;
+        private String selectionId;
         private String competition;
         private String update_time;
         private String country;
@@ -148,6 +149,12 @@ public class Odd {
 		}
 		public void setOddsFusion(ArrayList<Odd> oddsFusion) {
 			this.oddsFusion = oddsFusion;
+		}
+		public String getSelectionId() {
+			return selectionId;
+		}
+		public void setSelectionId(String selectionId) {
+			this.selectionId = selectionId;
 		}
 	
 		

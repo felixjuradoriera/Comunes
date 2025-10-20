@@ -385,7 +385,7 @@ public class NinjaService {
 			lectura.sort(Comparator.comparingDouble(o -> Double.parseDouble(o.getBackOdd())));
 	    	Collections.reverse(lectura);
 	    	for (Odd o : lectura.subList(0, Math.min(4, lectura.size()))) {
-				odd.setEquipoHome(o.getSelection());
+				
 				if(!o.getBookie().equals(odd.getBookie())) {
 					odd.getMejoresDraw().add(o);	
 				}

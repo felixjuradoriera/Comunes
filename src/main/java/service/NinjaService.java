@@ -206,7 +206,10 @@ public class NinjaService {
 		    	
 			}
 	    	
-	    	TelegramSender.eventosIniciales=lectura.size();   	
+		    if (TelegramSender.eventosIniciales==0) {
+		    	TelegramSender.eventosIniciales=lectura.size();	
+		    }
+	    	  	
 	    	return lectura;
 	    	
 	    }

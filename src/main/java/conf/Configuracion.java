@@ -29,8 +29,8 @@ public class Configuracion {
 
 	public static final String CSV_FILE = "C:" + File.separator + "BOT" + File.separator + "CONF" + File.separator + "oddsAnteriores.csv";
 
-	public static ArrayList<String> filtroBookies2UP = new ArrayList<String>(Arrays.asList("2", "48", "7", "39", "69"));
-	public static ArrayList<String> filtroBookies2UP2WAY = new ArrayList<String>(			Arrays.asList("2", "75", "48", "7", "39", "69", "47"));
+	public static ArrayList<String> filtroBookies2UP = new ArrayList<String>(Arrays.asList("2", "48", "7", "39", "69", "45"));
+	public static ArrayList<String> filtroBookies2UP2WAY = new ArrayList<String>(			Arrays.asList("2", "75", "48", "7", "39", "69", "47", "45"));
 	public static ArrayList<String> filtroBookiesVacio = new ArrayList<>();
 	public static ArrayList<String> filtroApuestas2UP = new ArrayList<String>(Arrays.asList("home", "away"));
 	public static ArrayList<String> filtroApuestasHome = new ArrayList<String>(Arrays.asList("home"));

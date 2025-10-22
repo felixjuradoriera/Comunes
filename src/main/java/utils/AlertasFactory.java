@@ -181,7 +181,7 @@ public class AlertasFactory {
         bookies.put("71", "Leovegas");
         bookies.put("44", "Luckia");
         bookies.put("55", "Marathonbet");
-        bookies.put("45", "Marcaapuestas");
+        bookies.put("45", "MarcaApuestas");
         bookies.put("107", "Olybet");
         bookies.put("46", "Paf");
         bookies.put("47", "Paston");

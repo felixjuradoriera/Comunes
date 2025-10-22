@@ -92,7 +92,7 @@ public class NinjaService {
 	    	boolean hayMasResultados=true;
 	    	int offset=0;
 	    	
-		    while (hayMasResultados && offset<6) {
+		    while (hayMasResultados && offset<7) {
 		    	String urlParameters=filtroPeticion.replace("offset=$", "offset=" + offset);
 		    	StringBuilder response= crearPeticionData(urlParameters, Configuracion.urlData);
 		    	

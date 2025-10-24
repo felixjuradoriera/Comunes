@@ -49,6 +49,30 @@ public class OddUtils {
 	
 	return odd;
 }
+    
+    public static Odd pasarHijaMadre(Odd madre, Odd hija) {
+    	
+    	madre.setBookie(hija.getBookie());
+    	madre.setRating(hija.getRating());
+    	madre.setBackOdd(hija.getBackOdd());
+    	madre.setLayOdd(hija.getLayOdd());
+    	madre.setSelection(hija.getSelection());
+    	madre.setSelectionId(hija.getSelectionId());
+    	madre.setCompetition(hija.getCompetition());
+    	madre.setUpdate_time(hija.getUpdate_time());
+    	madre.setCountry(hija.getCountry());
+    	madre.setTimeInMin(hija.getTimeInMin());
+    	madre.setBackOddOriginal(hija.getBackOddOriginal());
+    	madre.setRatingOriginal(hija.getRatingOriginal());
+    	madre.setFechaPartido(hija.getFechaPartido());
+    	madre.setsFechaPartido(hija.getsFechaPartido());
+    	madre.setMarket_id(hija.getMarket_id());
+    	madre.setNivelAlerta(1);
+    	//madre.setEquipoHome(hija.getEquipoHome());
+    	//madre.setEquipoAway(hija.getEquipoAway());
+    	    	
+    	return madre;
+    }
 	
 
 }

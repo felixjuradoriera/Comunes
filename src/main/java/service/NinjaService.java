@@ -416,11 +416,11 @@ public class NinjaService {
 				return odd;
 		}
 
-		public static Odd rellenaDrawExchange(Odd odd) throws Exception {
+		public static Odd rellenaDrawExchange(Odd odd, String marketId) throws Exception {
 
 			
 			//Buscamos la cuota "empate" en betfair exchange
-			String urlParameters=ExchangeService.crearUrlFiltroPeticionExchange(odd.getMarket_id());
+			String urlParameters=ExchangeService.crearUrlFiltroPeticionExchange(marketId);
 			StringBuilder response= ExchangeService.crearPeticionData(urlParameters, Configuracion.urlExchange);
 			List<Runner> listaExchange=ExchangeService.MapearResultadosExchange(response.toString());
 			
@@ -458,26 +458,37 @@ public class NinjaService {
 
 		
 		
-	    public static Odd rellenaCuotasTodas(Odd odd) throws Exception {
+	    public static Odd rellenaCuotasTodas(Odd odd, String codigosEventos, String marketId) throws Exception {
 	    	
 	       	
 	    	List<Event> eventos=buscaEventos(odd.getEvent());
 	    	
-	    	String codigosEventos="";
-	    	
-			if (!eventos.isEmpty()) {
-				for (Event event : eventos) {
-					codigosEventos += event.getId() + ",";
+			if (codigosEventos == null || codigosEventos.isEmpty()) {
+
+				codigosEventos = "";
+
+				if (!eventos.isEmpty()) {
+					for (Event event : eventos) {
+						codigosEventos += event.getId() + ",";
+					}
+
+					codigosEventos = codigosEventos.substring(0, codigosEventos.length() - 1);
 				}
-				
-				codigosEventos=codigosEventos.substring(0, codigosEventos.length() - 1);
+
+			}
+			odd=rellenaMejoresHome(odd, codigosEventos);
+			
+			if(odd.getMejoresHome()==null || odd.getMejoresHome().isEmpty()) {
+				return odd;
 			}
 			
-			odd=rellenaMejoresHome(odd, codigosEventos);
+			if (marketId == null || marketId.isEmpty()) {
+				marketId=odd.getMejoresHome().get(0).getMarket_id();
+			} 
 			
 			odd=rellenaMejoresDraw(odd, codigosEventos);			
 		
-			odd=rellenaDrawExchange(odd);
+			odd=rellenaDrawExchange(odd, marketId);
 			
 			odd=rellenaMejoresAway(odd, codigosEventos);
 					

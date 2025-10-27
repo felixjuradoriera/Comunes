@@ -38,6 +38,7 @@ public class TelegramSender {
     public static Integer response200_Adicional=0;
     public static Integer peticionesAExchange=0;
     public static Integer response403=0;
+    public static Integer response400Telegram=0;
     public static Integer eventosIniciales=0;
     public static Integer eventosFinales=0;
     public static Integer alertasEnviadas=0;
@@ -64,6 +65,9 @@ public class TelegramSender {
             }
 
             int responseCode = conn.getResponseCode();
+            if(responseCode==400) {
+            	response400Telegram++;	
+            }
             System.out.println("📩 Telegram response: " + responseCode);
 
             try (BufferedReader in = new BufferedReader(
@@ -126,6 +130,9 @@ public class TelegramSender {
                 }
 
                 int responseCode = conn.getResponseCode();
+                if(responseCode==400) {
+                	response400Telegram++;	
+                }
                 System.out.println("📩 Telegram response: " + responseCode);
 
                 try (BufferedReader in = new BufferedReader(
@@ -173,6 +180,9 @@ public class TelegramSender {
             }
 
             int responseCode = conn.getResponseCode();
+            if(responseCode==400) {
+            	response400Telegram++;	
+            }
             System.out.println("📩 Telegram response: " + responseCode);
 
             try (BufferedReader in = new BufferedReader(
@@ -213,6 +223,9 @@ public class TelegramSender {
            }
 
            int responseCode = conn.getResponseCode();
+           if(responseCode==400) {
+           	response400Telegram++;	
+           }
            System.out.println("📩 Telegram response: " + responseCode);
 
            try (BufferedReader in = new BufferedReader(
@@ -267,6 +280,9 @@ public class TelegramSender {
             }
 
             int responseCode = conn.getResponseCode();
+            if(responseCode==400) {
+            	response400Telegram++;	
+            }
             System.out.println("📩 Telegram response: " + responseCode);
 
             try (BufferedReader in = new BufferedReader(
@@ -314,6 +330,9 @@ public class TelegramSender {
               }
 
               int responseCode = conn.getResponseCode();
+              if(responseCode==400) {
+              	response400Telegram++;	
+              }
               System.out.println("📩 Telegram response: " + responseCode);
 
               try (BufferedReader in = new BufferedReader(

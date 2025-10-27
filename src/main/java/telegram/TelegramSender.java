@@ -161,7 +161,7 @@ public class TelegramSender {
             conn.setDoOutput(true);
             conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
             
-            String callBackData="excluir" + "|" + odd.getMarket_id() + "|" + odd.getsFechaPartido() + "|" + odd.getEvent();
+            String callBackData="excluir" + "|" + odd.getMarket_id() + "|" + odd.getsFechaPartido();
             String callBackData2WAY="way" + "|" + odd.getMarket_id() + "|" + odd.getEvent();
 
            String json="";

@@ -1,5 +1,7 @@
 package utils;
 
+import java.security.SecureRandom;
+
 import conf.Configuracion;
 import dto.Odd;
 
@@ -74,5 +76,14 @@ public class OddUtils {
     	return madre;
     }
 	
+    
+    public static Long dameIdOdd() {
+    	
+    	 SecureRandom random = new SecureRandom();
+         Long idUnico = Math.abs(random.nextLong() % 1_000_000_000L);
+                 
+         return idUnico;
+    	
+    }
 
 }

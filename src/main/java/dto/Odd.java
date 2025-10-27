@@ -38,6 +38,10 @@ public class Odd {
         String equipoHome="";
         String equipoAway="";
         
+        long idOdd;
+        
+        
+        
         private LocalDateTime fechaAlerta;
 
         // getters y setters
@@ -155,6 +159,12 @@ public class Odd {
 		}
 		public void setSelectionId(String selectionId) {
 			this.selectionId = selectionId;
+		}
+		public Long getIdOdd() {
+			return idOdd;
+		}
+		public void setIdOdd(Long idOdd) {
+			this.idOdd = idOdd;
 		}
 	
 		

@@ -80,8 +80,8 @@ public class TelegramSender {
                 conn.setDoOutput(true);
                 conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
                 
-                String callBackData="excluir" + "|" + odd.getMarket_id() + "|" + odd.getsFechaPartido() ;
-                String callBackData2WAY="way" + "|" + odd.getMarket_id() + "|" + odd.getEvent();
+                String callBackData="excluir" + "|" + odd.getIdOdd() ;
+                String callBackData2WAY="way" + "|" + odd.getIdOdd() ;
 
                String json="";
                 if(chatId.equals("-1003064907759")) {
@@ -145,8 +145,8 @@ public class TelegramSender {
             conn.setDoOutput(true);
             conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
             
-            String callBackData="excluir" + "|" + odd.getMarket_id() + "|" + odd.getsFechaPartido();
-            String callBackData2WAY="way" + "|" + odd.getMarket_id() + "|" + odd.getEvent();
+            String callBackData="excluir" + "|" + odd.getIdOdd() ;
+            String callBackData2WAY="way" + "|" + odd.getIdOdd() ;
 
            String json="";
            

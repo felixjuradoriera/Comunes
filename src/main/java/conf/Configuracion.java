@@ -7,8 +7,8 @@ import java.util.Arrays;
 public class Configuracion {
 	
 	 // ⚠️ Sustituye por los tuyos
-	public static final String BOT_TOKEN = "7380837153:AAHMQFIyGwO-FSwq9DvpQjnH4JroSy9tOSs";  //PRO
-   // public static final String BOT_TOKEN = "7029538813:AAH2I40DoMKEWLpVph3qrWUJ3vilGTEQABg";  //PRE
+	//public static final String BOT_TOKEN = "7380837153:AAHMQFIyGwO-FSwq9DvpQjnH4JroSy9tOSs";  //PRO
+   public static final String BOT_TOKEN = "7029538813:AAH2I40DoMKEWLpVph3qrWUJ3vilGTEQABg";  //PRE
     
     
    // private static final String[] CHAT_IDS = {"403482161","-1003064907759"};

@@ -10,29 +10,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.List;
 
+import conf.Configuracion;
 import dto.MenuOpcion;
 import dto.Odd;
 
 public class TelegramSender {
 
-    // ⚠️ Sustituye por los tuyos
-    private static final String BOT_TOKEN = "7380837153:AAHMQFIyGwO-FSwq9DvpQjnH4JroSy9tOSs";  //PRO
-   // private static final String BOT_TOKEN = "7029538813:AAH2I40DoMKEWLpVph3qrWUJ3vilGTEQABg";  //PRE
-    
-    
-   // private static final String[] CHAT_IDS = {"403482161","-1003064907759"};
-    /*  ESTE METODO NO SE UTILIZA*/
-    private static final String[] CHAT_IDS = {"403482161"};  //<-- este soy yo
-  // private static final String[] CHAT_IDS = {"-1003064907759"}; //<-- este es el chat grupal
-    
-    //hola aqui
-    //private static final String[] CHAT_IDS_DEBUG = {"403482161"}; //<--- este soy yo
-    private static final String[] CHAT_IDS_DEBUG = {"-4914584937"}; //<-- este es el chatDebug
-    
-    
-    private static final String[] CHAT_IDS_VIGILANTE = {"1066152103"}; //<-- este es el chat de lucas
-    //private static final String[] CHAT_IDS_VIGILANTE = {"403482161"}; //<-- este soy yo
-    
+       
     public static Integer response200_Inicial=0;
     public static Integer response200_Events=0;
     public static Integer response200_Adicional=0;
@@ -45,9 +29,9 @@ public class TelegramSender {
     
     /*  ESTE METODO NO SE UTILIZA*/
     public static void sendTelegramMessage(String text) {
-    	 for (String chatId : CHAT_IDS) {
+    	 for (String chatId : Configuracion.CHAT_IDS) {
         try {
-            String urlString = "https://api.telegram.org/bot" + BOT_TOKEN + "/sendMessage";
+            String urlString = "https://api.telegram.org/bot" + Configuracion.BOT_TOKEN + "/sendMessage";
             String urlParameters = "chat_id=" + chatId
                     + "&text=" + URLEncoder.encode(text, "UTF-8")
                     + "&parse_mode=HTML" // HTML limitado
@@ -89,7 +73,7 @@ public class TelegramSender {
     public static void sendTelegramMessageAlerta(String text , Odd odd, String chatId) {
         
             try {
-                String urlString = "https://api.telegram.org/bot" + BOT_TOKEN + "/sendMessage";
+                String urlString = "https://api.telegram.org/bot" + Configuracion.BOT_TOKEN + "/sendMessage";
                 URL url = new URL(urlString);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
@@ -154,7 +138,7 @@ public class TelegramSender {
     public static void sendTelegramMessageAlerta2WAY(String text , Odd odd, String chatId) {
         
         try {
-            String urlString = "https://api.telegram.org/bot" + BOT_TOKEN + "/sendMessage";
+            String urlString = "https://api.telegram.org/bot" + Configuracion.BOT_TOKEN + "/sendMessage";
             URL url = new URL(urlString);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
@@ -204,9 +188,9 @@ public class TelegramSender {
     
     
     public static void sendTelegramMessageDebug(String text) {
-   	 for (String chatId : CHAT_IDS_DEBUG) {
+   	 for (String chatId : Configuracion.CHAT_IDS_DEBUG) {
        try {
-           String urlString = "https://api.telegram.org/bot" + BOT_TOKEN + "/sendMessage";
+           String urlString = "https://api.telegram.org/bot" + Configuracion.BOT_TOKEN + "/sendMessage";
            String urlParameters = "chat_id=" + chatId
                    + "&text=" + URLEncoder.encode(text, "UTF-8")
                    + "&parse_mode=HTML"; // HTML limitado
@@ -248,7 +232,7 @@ public class TelegramSender {
     public static void sendTelegramMessageConMenuOpciones(String text, String chatId , List<MenuOpcion> opciones) {
         
         try {
-            String urlString = "https://api.telegram.org/bot" + BOT_TOKEN + "/sendMessage";
+            String urlString = "https://api.telegram.org/bot" + Configuracion.BOT_TOKEN + "/sendMessage";
             URL url = new URL(urlString);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
@@ -311,9 +295,9 @@ public class TelegramSender {
          mensajeDebug.append("<b>Probable caída de la VPN. Avisar").append("</b>\n");
          String text=mensajeDebug.toString();
          
-      	 for (String chatId : CHAT_IDS_VIGILANTE) {
+      	 for (String chatId : Configuracion.CHAT_IDS_VIGILANTE) {
           try {
-              String urlString = "https://api.telegram.org/bot" + BOT_TOKEN + "/sendMessage";
+              String urlString = "https://api.telegram.org/bot" + Configuracion.BOT_TOKEN + "/sendMessage";
               String urlParameters = "chat_id=" + chatId
                       + "&text=" + URLEncoder.encode(text, "UTF-8")
                       + "&parse_mode=HTML"; // HTML limitado

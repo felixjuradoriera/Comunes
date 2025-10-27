@@ -5,6 +5,24 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Configuracion {
+	
+	 // ⚠️ Sustituye por los tuyos
+	public static final String BOT_TOKEN = "7380837153:AAHMQFIyGwO-FSwq9DvpQjnH4JroSy9tOSs";  //PRO
+   // public static final String BOT_TOKEN = "7029538813:AAH2I40DoMKEWLpVph3qrWUJ3vilGTEQABg";  //PRE
+    
+    
+   // private static final String[] CHAT_IDS = {"403482161","-1003064907759"};
+    /*  ESTE METODO NO SE UTILIZA*/
+	public static final String[] CHAT_IDS = {"403482161"};  //<-- este soy yo
+  // public static final String[] CHAT_IDS = {"-1003064907759"}; //<-- este es el chat grupal
+    
+    //hola aqui
+    //public static final String[] CHAT_IDS_DEBUG = {"403482161"}; //<--- este soy yo
+	public static final String[] CHAT_IDS_DEBUG = {"-4914584937"}; //<-- este es el chatDebug
+    
+    
+	public static final String[] CHAT_IDS_VIGILANTE = {"1066152103"}; //<-- este es el chat de lucas
+    //public static final String[] CHAT_IDS_VIGILANTE = {"403482161"}; //<-- este soy yo
 
 	
 	public static String urlData = "https://www.ninjabet.es/get_data_sp.php";

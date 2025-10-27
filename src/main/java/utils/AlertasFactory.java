@@ -49,7 +49,7 @@ public class AlertasFactory {
 		   		 }
 		            		 
 			mensaje.append("    ⏱ ").append(odFusion.getUpdate_time()).append("\n");
-			mensaje.append("    🔗 <a href=\"https://www.betfair.es/exchange/football/market?id=").append(odFusion.getMarket_id()).append("\">Ver en Betfair</a>\n\n"); 
+			mensaje.append("    🔗 <a href=\"https://www.betfair.es/exchange/plus/football/market?id=").append(odFusion.getMarket_id()).append("\">Ver en Betfair</a>\n\n"); 
 			 
 			 
 		}

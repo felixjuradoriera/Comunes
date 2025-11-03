@@ -29,7 +29,7 @@ public class OddsCSVUtils {
                 pw.println(String.join(";",
                         o.getEvent(), o.getBookie(), o.getRating(), o.getBackOdd(),
                         o.getLayOdd(), o.getSelection(), o.getCompetition(),
-                        o.getUpdate_time(), o.getCountry(), o.getTimeInMin().toString(), fechaFormateada, String.valueOf(o.getIdOdd()), o.getsFechaPartido(), o.getMarket_id()));
+                        o.getUpdate_time(), o.getCountry(), o.getTimeInMin().toString(), fechaFormateada, String.valueOf(o.getIdOdd()), o.getsFechaPartido(), o.getMarket_id(),String.valueOf(o.getStakeEntradaBookie()), String.valueOf(o.getStakeEntradaExchange()),String.valueOf(o.getBookieWins()),String.valueOf(o.getExchangeWins()),String.valueOf(o.getPorcEarly()),String.valueOf(o.getStakeEarly()),String.valueOf(o.getBackOddEarly())));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -79,8 +79,36 @@ public class OddsCSVUtils {
                 	
                 	
                 }
-                if (campos.length >= 13) {
+                if (campos.length >= 14) {
                 	o.setMarket_id(campos[13]);
+                	               	
+                }
+                if (campos.length >= 15) {
+                	o.setStakeEntradaBookie(Double.valueOf(campos[14]));
+                	               	
+                }
+                if (campos.length >= 16) {
+                	o.setStakeEntradaExchange(Double.valueOf(campos[15]));
+                	               	
+                }
+                if (campos.length >= 17) {
+                	o.setBookieWins(Double.valueOf(campos[16]));
+                	               	
+                }
+                if (campos.length >= 18) {
+                	o.setExchangeWins(Double.valueOf(campos[17]));
+                	               	
+                }
+                if (campos.length >= 19) {
+                	o.setPorcEarly(Double.valueOf(campos[18]));
+                	               	
+                }
+                if (campos.length >= 20) {
+                	o.setStakeEarly(Double.valueOf(campos[19]));
+                	               	
+                }
+                if (campos.length >= 21) {
+                	o.setBackOddEarly((Double.valueOf(campos[20])));                          
                 	               	
                 }
                 
@@ -97,12 +125,19 @@ public class OddsCSVUtils {
     	
     	if(sIdOdd!=null && !sIdOdd.isEmpty()) {
     		Long idOdd=Long.valueOf(sIdOdd);	
-    		ArrayList<Odd> oddsAnterioresHist = OddsCSVUtils.leerCSV(Configuracion.CSV_FILE_HIST);
-    		for (Odd odd : oddsAnterioresHist) {
-				if(odd.getIdOdd().longValue()==idOdd.longValue()) {
-					return odd;
-				}
+    		try {
+    			ArrayList<Odd> oddsAnterioresHist = OddsCSVUtils.leerCSV(Configuracion.CSV_FILE_HIST);
+    			for (Odd odd : oddsAnterioresHist) {
+    				if(odd.getIdOdd().longValue()==idOdd.longValue()) {
+    					return odd;
+    				}
+    			}
+        		
+			} catch (Exception e) {
+				e.printStackTrace();
+				// TODO: handle exception
 			}
+    		
     		
     		return null;
     	} else {

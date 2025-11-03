@@ -13,6 +13,7 @@ import java.util.List;
 import conf.Configuracion;
 import dto.MenuOpcion;
 import dto.Odd;
+import utils.AlertasFactory;
 
 public class TelegramSender {
 
@@ -82,6 +83,14 @@ public class TelegramSender {
                 
                 String callBackData="excluir" + "|" + odd.getIdOdd() ;
                 String callBackData2WAY="way" + "|" + odd.getIdOdd() ;
+                
+                String botonesEntrar="";
+                String callBackEntrar="";
+                
+                for (Odd oddFusion : odd.getOddsFusion()) {
+                	callBackEntrar="entrar" + "|" + oddFusion.getIdOdd();
+					botonesEntrar+=",[{\"text\":\"Entrar "+ AlertasFactory.getNombreBookie(oddFusion.getBookie())  + "\",\"callback_data\":\""+ callBackEntrar +"\"}]";
+				}
 
                String json="";
                 if(chatId.equals("-1003064907759")) {
@@ -102,6 +111,7 @@ public class TelegramSender {
                              + "   \"inline_keyboard\":["
                              + "       [{\"text\":\"❌ Quitar este evento de tus alertas\",\"callback_data\":\""+ callBackData +"\"}],"
                              + "       [{\"text\":\"Consultar Opciones 2WAY\",\"callback_data\":\""+ callBackData2WAY +"\"}]"
+                             + botonesEntrar
                              + "   ]"
                              + "}"
                              + "}";

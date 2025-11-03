@@ -38,8 +38,17 @@ public class Odd {
         String equipoHome="";
         String equipoAway="";
         
-        long idOdd;
+        Long idOdd;
         
+        Double stakeEntradaBookie=0.0;
+        Double stakeEntradaExchange=0.0;
+        Double BackOddEarly=0.0;
+        Double stakeEarly=0.0;
+        Double porcEarly=0.0;
+        Double bookieWins=0.0;
+        Double ExchangeWins=0.0;
+        
+        ArrayList<Odd> cierres=new ArrayList<Odd>();       
         
         
         private LocalDateTime fechaAlerta;
@@ -166,7 +175,56 @@ public class Odd {
 		public void setIdOdd(Long idOdd) {
 			this.idOdd = idOdd;
 		}
-	
+		public Double getStakeEntradaBookie() {
+			return stakeEntradaBookie;
+		}
+		public void setStakeEntradaBookie(Double stakeEntradaBookie) {
+			this.stakeEntradaBookie = stakeEntradaBookie;
+		}
+		public Double getStakeEntradaExchange() {
+			return stakeEntradaExchange;
+		}
+		public void setStakeEntradaExchange(Double stakeEntradaExchange) {
+			this.stakeEntradaExchange = stakeEntradaExchange;
+		}
+		public Double getBackOddEarly() {
+			return BackOddEarly;
+		}
+		public void setBackOddEarly(Double backOddEarly) {
+			BackOddEarly = backOddEarly;
+		}
+		public ArrayList<Odd> getCierres() {
+			return cierres;
+		}
+		public void setCierres(ArrayList<Odd> cierres) {
+			this.cierres = cierres;
+		}
+		public Double getBookieWins() {
+			return bookieWins;
+		}
+		public void setBookieWins(Double bookieWins) {
+			this.bookieWins = bookieWins;
+		}
+		public Double getExchangeWins() {
+			return ExchangeWins;
+		}
+		public void setExchangeWins(Double exchangeWins) {
+			ExchangeWins = exchangeWins;
+		}
+		public Double getPorcEarly() {
+			return porcEarly;
+		}
+		public void setPorcEarly(Double porcEarly) {
+			this.porcEarly = porcEarly;
+		}
+		public Double getStakeEarly() {
+			return stakeEarly;
+		}
+		public void setStakeEarly(Double stakeEarly) {
+			this.stakeEarly = stakeEarly;
+		}
+		
+		
 		
         
     }

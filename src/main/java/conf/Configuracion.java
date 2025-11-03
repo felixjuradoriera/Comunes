@@ -7,8 +7,8 @@ import java.util.Arrays;
 public class Configuracion {
 	
 	 // ⚠️ Sustituye por los tuyos
-	public static final String BOT_TOKEN = "7380837153:AAHMQFIyGwO-FSwq9DvpQjnH4JroSy9tOSs";  //PRO
-   //public static final String BOT_TOKEN = "7029538813:AAH2I40DoMKEWLpVph3qrWUJ3vilGTEQABg";  //PRE
+	//public static final String BOT_TOKEN = "7380837153:AAHMQFIyGwO-FSwq9DvpQjnH4JroSy9tOSs";  //PRO
+   public static final String BOT_TOKEN = "7029538813:AAH2I40DoMKEWLpVph3qrWUJ3vilGTEQABg";  //PRE
     
     
    // private static final String[] CHAT_IDS = {"403482161","-1003064907759"};
@@ -47,6 +47,8 @@ public class Configuracion {
 
 	public static final String CSV_FILE = "C:" + File.separator + "BOT" + File.separator + "CONF" + File.separator + "oddsAnteriores.csv";
 	public static final String CSV_FILE_HIST = "C:" + File.separator + "BOT" + File.separator + "CONF" + File.separator + "oddsAnterioresHist.csv";
+	
+	public static final String CSV_FILE_ENTRADAS = "C:" + File.separator + "BOT" + File.separator + "CONF" + File.separator + "ENTRADAS" + File.separator;
 
 	public static ArrayList<String> filtroBookies2UP = new ArrayList<String>(Arrays.asList("2", "48", "7", "39", "69", "45"));
 	public static ArrayList<String> filtroBookies2UP2WAY = new ArrayList<String>(			Arrays.asList("2", "75", "48", "7", "39", "69", "47", "45"));

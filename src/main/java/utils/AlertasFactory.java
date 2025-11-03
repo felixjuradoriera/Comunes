@@ -96,6 +96,85 @@ public class AlertasFactory {
 		
 	}
 	
+	public static StringBuilder createFichaEntrada(Odd odd) {
+		
+		StringBuilder mensaje = new StringBuilder();
+		
+		 mensaje.append("⚽ <b>").append(odd.getEvent()).append("</b>\n");
+		 mensaje.append("🗓️ <b>").append(odd.getsFechaPartido()).append("h").append("</b>\n");
+		 mensaje.append("<b>").append("Entrada Realizada:").append("</b>\n");
+		 mensaje.append(AlertasFactory.getNombreBookie(odd.getBookie())).append("-><b>").append(odd.getStakeEntradaBookie()).append("€ </b> BACK a <b>").append(odd.getBackOdd()).append("</b>\n");
+		 mensaje.append("Exchange->").append(" <b>").append(odd.getStakeEntradaExchange()).append("€ </b> LAY a <b>").append(odd.getLayOdd()).append("</b>\n");
+		 
+		if(odd.getCierres()!=null && !odd.getCierres().isEmpty()) {
+			 mensaje.append("\n");
+			mensaje.append("<b>").append("Cierres 2UP:").append("</b>\n");
+			for (Odd cierre : odd.getCierres()) {
+				mensaje.append("-><b>").append(cierre.getStakeEarly()).append("</b> BACK a <b>").append(cierre.getBackOddEarly()).append("</b>\n");
+			}
+		}
+		 
+		 mensaje.append("\n");
+		 mensaje.append("<b>").append("Resultado:").append("</b>\n");
+		 if(odd.getBookieWins()<0) {
+			 mensaje.append("BACK Wins: ").append("🔴 <b>").append(odd.getBookieWins()).append("€ </b> ").append("\n");	 
+		 } else {
+			 mensaje.append("BACK Wins: ").append("🟢 <b>").append(odd.getBookieWins()).append("€ </b> ").append("\n");
+		 }
+		 
+		 if(odd.getExchangeWins()<0) {
+			 mensaje.append("LAY Wins: ").append("🔴 <b>").append(odd.getExchangeWins()).append("€ </b> ").append("\n");	 
+		 } else {
+			 mensaje.append("LAY Wins: ").append("🟢 <b>").append(odd.getExchangeWins()).append("€ </b> ").append("\n");
+		 }
+		 
+		 
+		
+		return mensaje;
+		
+	}
+	
+	
+public static StringBuilder createFichaCierreParcial(Odd odd) {
+		
+		StringBuilder mensaje = new StringBuilder();
+		
+		 mensaje.append("⚽ <b>").append(odd.getEvent()).append("</b>\n");
+		 mensaje.append("🗓️ <b>").append(odd.getsFechaPartido()).append("h").append("</b>\n");
+		 mensaje.append("<b>").append("Entrada Realizada:").append("</b>\n");
+		 mensaje.append(AlertasFactory.getNombreBookie(odd.getBookie())).append("-><b>").append(odd.getStakeEntradaBookie()).append("€ </b> BACK a <b>").append(odd.getBackOdd()).append("</b>\n");
+		 mensaje.append("Exchange->").append(" <b>").append(odd.getStakeEntradaExchange()).append("€ </b> LAY a <b>").append(odd.getLayOdd()).append("</b>\n");
+		 
+		 if(odd.getCierres()!=null && !odd.getCierres().isEmpty()) {
+			 	mensaje.append("\n");
+				mensaje.append("<b>").append("Cierres 2UP:").append("</b>\n");
+				for (Odd cierre : odd.getCierres()) {
+					mensaje.append("-><b>").append(cierre.getStakeEarly()).append("</b> BACK a <b>").append(cierre.getBackOddEarly()).append("</b>\n");
+				}
+		}
+		 
+		 mensaje.append("\n");
+		 mensaje.append("👉Apuesta->").append("<b>").append(odd.getStakeEarly()).append("€ </b> BACK a <b>").append(odd.getBackOddEarly()).append("</b>\n\n");
+		 		 
+		 
+		 mensaje.append("<b>").append("Resultado:").append("</b>\n");
+		 if(odd.getBookieWins()<0) {
+			 mensaje.append("Bookie Wins: ").append("🔴 <b>").append(odd.getBookieWins()).append("€ </b> ").append("\n");	 
+		 } else {
+			 mensaje.append("Bookie Wins: ").append("🟢 <b>").append(odd.getBookieWins()).append("€ </b> ").append("\n");
+		 }
+		 
+		 if(odd.getExchangeWins()<0) {
+			 mensaje.append("Exchange Wins: ").append("🔴 <b>").append(odd.getExchangeWins()).append("€ </b> ").append("\n");	 
+		 } else {
+			 mensaje.append("Exchange Wins: ").append("🟢 <b>").append(odd.getExchangeWins()).append("€ </b> ").append("\n");
+		 }
+		 
+		 
+		
+		return mensaje;
+		
+	}
 	
 	
 	
@@ -151,7 +230,7 @@ public class AlertasFactory {
 	}
 	
 	
-    private static String getNombreBookie(String bookie) {
+    public static String getNombreBookie(String bookie) {
         Map<String, String> bookies = new HashMap<>();
         bookies.put("68", "1xbet");
         bookies.put("1", "888sport");

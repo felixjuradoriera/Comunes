@@ -103,6 +103,7 @@ public class AlertasFactory {
 		 mensaje.append("⚽ <b>").append(odd.getEvent()).append("</b>\n");
 		 mensaje.append("🗓️ <b>").append(odd.getsFechaPartido()).append("h").append("</b>\n");
 		 mensaje.append("<b>").append("Entrada Realizada:").append("</b>\n");
+		 mensaje.append("<b>").append(odd.getSelection()).append("</b> Rat:<b>").append(odd.getRating()).append("%</b>\n");
 		 mensaje.append(AlertasFactory.getNombreBookie(odd.getBookie())).append("-><b>").append(odd.getStakeEntradaBookie()).append("€ </b> BACK a <b>").append(odd.getBackOdd()).append("</b>\n");
 		 mensaje.append("Exchange->").append(" <b>").append(odd.getStakeEntradaExchange()).append("€ </b> LAY a <b>").append(odd.getLayOdd()).append("</b>\n");
 		 
@@ -142,6 +143,7 @@ public static StringBuilder createFichaCierreParcial(Odd odd) {
 		 mensaje.append("⚽ <b>").append(odd.getEvent()).append("</b>\n");
 		 mensaje.append("🗓️ <b>").append(odd.getsFechaPartido()).append("h").append("</b>\n");
 		 mensaje.append("<b>").append("Entrada Realizada:").append("</b>\n");
+		 mensaje.append("<b>").append(odd.getSelection()).append("</b> Rat:<b>").append(odd.getRating()).append("%</b>\n");
 		 mensaje.append(AlertasFactory.getNombreBookie(odd.getBookie())).append("-><b>").append(odd.getStakeEntradaBookie()).append("€ </b> BACK a <b>").append(odd.getBackOdd()).append("</b>\n");
 		 mensaje.append("Exchange->").append(" <b>").append(odd.getStakeEntradaExchange()).append("€ </b> LAY a <b>").append(odd.getLayOdd()).append("</b>\n");
 		 

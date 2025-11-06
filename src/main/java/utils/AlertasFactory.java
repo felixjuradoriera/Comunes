@@ -34,7 +34,7 @@ public class AlertasFactory {
 			 
 			 mensaje.append("    🏛 <b>").append(getNombreBookie(odFusion.getBookie())).append("</b>\n");
 			 
-			 if (odFusion.getBookie().equals("39")) {
+			 if (odFusion.getBookie().equals("39") || odFusion.getBookie().equals("20")) {
 				 mensaje.append("    📈 <b>").append(odFusion.getRating()).append("%</b> (").append(odFusion.getRatingOriginal()).append(")\n");
 			 } else {
 				 mensaje.append("    📈 <b>").append(odFusion.getRating()).append("%</b>\n");
@@ -42,7 +42,7 @@ public class AlertasFactory {
 			             		
 			 mensaje.append("    Ap: <b>").append(odFusion.getSelection()).append("</b>\n");
 			 
-			 if (odFusion.getBookie().equals("39")) {
+			 if (odFusion.getBookie().equals("39") || odFusion.getBookie().equals("20")) {
 				 mensaje.append("    📋 Back: <b>").append(odFusion.getBackOdd()).append("</b> (").append(odFusion.getBackOddOriginal()).append(") | Lay: <b>").append(odFusion.getLayOdd()).append("</b>\n");	 
 			 } else {
 				 mensaje.append("    📋 Back: <b>").append(odFusion.getBackOdd()).append("</b> | Lay: <b>").append(odFusion.getLayOdd()).append("</b>\n"); 
@@ -60,7 +60,7 @@ public class AlertasFactory {
 		{
 			mensaje.append("🟢<b>").append(odd.getEquipoHome()).append("</b>\n");
 			for (Odd o : odd.getMejoresHome()) {
-				 if (o.getBookie().equals("39")) {
+				 if (o.getBookie().equals("39") || o.getBookie().equals("20")) {
 					mensaje.append("     ").append(getNombreBookie(o.getBookie())).append("->").append(o.getBackOdd()).append("(").append(o.getBackOddOriginal()).append(")").append("\n");	 
 				 } else {
 					mensaje.append("     ").append(getNombreBookie(o.getBookie())).append("->").append(o.getBackOdd()).append("\n"); 
@@ -72,7 +72,7 @@ public class AlertasFactory {
 		{
 			mensaje.append("🟢<b>").append(odd.getEquipoAway()).append("</b>\n");
 			for (Odd o : odd.getMejoresAway()) {
-				if (o.getBookie().equals("39")) {
+				if (o.getBookie().equals("39") || o.getBookie().equals("20")) {
 					mensaje.append("     ").append(getNombreBookie(o.getBookie())).append("->").append(o.getBackOdd()).append("(").append(o.getBackOddOriginal()).append(")").append("\n");	
 				} else {
 					mensaje.append("     ").append(getNombreBookie(o.getBookie())).append("->").append(o.getBackOdd()).append("\n");
@@ -192,7 +192,7 @@ public static StringBuilder createFichaCierreParcial(Odd odd) {
 		mensaje.append("🔔<u><b> 2WAY 2UP </b></u>\n");
 		mensaje.append("🟢<b>").append(odd.getEquipoHome()).append("</b>\n");
 		for (Odd o : odd.getMejoresHome()) {
-			 if (o.getBookie().equals("39")) {
+			 if (o.getBookie().equals("39") || o.getBookie().equals("20")) {
 				mensaje.append("     ").append(getNombreBookie(o.getBookie())).append("->").append(o.getBackOdd()).append("(").append(o.getBackOddOriginal()).append(")").append("\n");	 
 			 } else {
 				mensaje.append("     ").append(getNombreBookie(o.getBookie())).append("->").append(o.getBackOdd()).append("\n"); 
@@ -202,7 +202,7 @@ public static StringBuilder createFichaCierreParcial(Odd odd) {
 		
 		mensaje.append("🟢<b>").append("Empate").append("</b>\n");
 		for (Odd o : odd.getMejoresDraw()) {
-			if (o.getBookie().equals("39") || o.getBookie().equals("2")) {
+			if (o.getBookie().equals("39") || o.getBookie().equals("2") || o.getBookie().equals("20")) {
 				mensaje.append("     ").append(getNombreBookie(o.getBookie())).append("->").append(o.getBackOdd()).append("(").append(o.getBackOddOriginal()).append(")").append("\n");	
 			} else {
 				mensaje.append("     ").append(getNombreBookie(o.getBookie())).append("->").append(o.getBackOdd()).append("\n");
@@ -217,7 +217,7 @@ public static StringBuilder createFichaCierreParcial(Odd odd) {
 		
 		mensaje.append("🟢<b>").append(odd.getEquipoAway()).append("</b>\n");
 		for (Odd o : odd.getMejoresAway()) {
-			if (o.getBookie().equals("39")) {
+			if (o.getBookie().equals("39") || o.getBookie().equals("20")) {
 				mensaje.append("     ").append(getNombreBookie(o.getBookie())).append("->").append(o.getBackOdd()).append("(").append(o.getBackOddOriginal()).append(")").append("\n");	
 			} else {
 				mensaje.append("     ").append(getNombreBookie(o.getBookie())).append("->").append(o.getBackOdd()).append("\n");

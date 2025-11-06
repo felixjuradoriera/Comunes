@@ -12,7 +12,7 @@ public class OddUtils {
     public static Odd ajustaCuotaRating(Odd odd) {
     	
 		
-		if(odd.getBookie().equals("39") && !odd.getSelection().equalsIgnoreCase("empate")) {
+		if((odd.getBookie().equals("39") || odd.getBookie().equals("20")) && !odd.getSelection().equalsIgnoreCase("empate")) {
 		System.out.println("AJUSTE CUOTA CODERE--> cuota Back: " + odd.getBackOdd() + "   rating: " + odd.getRating() + " cuota Lay: " + odd.getLayOdd() );
 		Double cuotaBack=Double.valueOf(odd.getBackOdd());
 		Double cuotaLay=Double.valueOf(odd.getLayOdd());

@@ -145,6 +145,50 @@ public class TelegramSender {
        
     }
     
+    public static void sendTelegramMessageAlertaMover(String text , Odd odd, String chatId) {
+        
+        try {
+            String urlString = "https://api.telegram.org/bot" + Configuracion.BOT_TOKEN_MOVER + "/sendMessage";
+            URL url = new URL(urlString);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setDoOutput(true);
+            conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+         
+            
+           String json = "{"
+                    + "\"chat_id\":\"" + chatId + "\","
+                    + "\"text\":\"" + text.replace("\"", "\\\"") + "\","
+                    + "\"parse_mode\":\"HTML\","
+                    + "\"disable_web_page_preview\":true"
+                    + "}";
+
+            try (OutputStream os = conn.getOutputStream()) {
+                os.write(json.getBytes(StandardCharsets.UTF_8));
+            }
+
+            int responseCode = conn.getResponseCode();
+            if(responseCode==400) {
+            	response400Telegram++;	
+            }
+            System.out.println("📩 Telegram response: " + responseCode);
+
+            try (BufferedReader in = new BufferedReader(
+                    new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
+                String line;
+                StringBuilder response = new StringBuilder();
+                while ((line = in.readLine()) != null) {
+                    response.append(line);
+                }
+                System.out.println("📩 Respuesta Telegram: " + response);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+   
+}
+    
     public static void sendTelegramMessageAlerta2WAY(String text , Odd odd, String chatId) {
         
         try {

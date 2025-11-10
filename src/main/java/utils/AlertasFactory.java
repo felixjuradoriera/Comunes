@@ -96,6 +96,30 @@ public class AlertasFactory {
 		
 	}
 	
+	public static StringBuilder createAlertaMover(Odd odd) {
+		
+		StringBuilder mensaje = new StringBuilder();
+    	
+		mensaje.append("‼️‼️<b>").append("ALERTA MOVER</b>‼️‼️\n");
+		 
+		mensaje.append("⚽ <b>").append(odd.getEvent()).append("</b>\n");
+		 mensaje.append("🏆 <b>").append(odd.getCompetition()).append(" (").append(odd.getCountry()).append(")</b>\n");
+		 mensaje.append("🗓️ <b>").append(odd.getsFechaPartido()).append("h").append("</b>\n\n");
+		
+		 mensaje.append("    🏛 <b>").append(getNombreBookie(odd.getBookie())).append("</b>\n");
+		 mensaje.append("    📈 <b>").append(odd.getRating()).append("%</b>\n");
+		 mensaje.append("    📋 Back: <b>").append(odd.getBackOdd()).append("</b> | Lay: <b>").append(odd.getLayOdd()).append("</b>\n");
+		 
+		
+		mensaje.append("    ⏱ ").append(odd.getUpdate_time()).append("\n");
+		mensaje.append("    🔗 <a href=\"https://www.betfair.es/exchange/plus/football/market?id=").append(odd.getMarket_id()).append("\">Ver en Betfair</a>\n\n"); 
+		 
+		
+		return mensaje;
+		
+		
+	}
+	
 	public static StringBuilder createFichaEntrada(Odd odd) {
 		
 		StringBuilder mensaje = new StringBuilder();

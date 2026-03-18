@@ -207,10 +207,14 @@ public class ViliBetsService {
 	    	
 	        try (Response response1 = client.newCall(request).execute()) {
 
-	            System.out.println("HTTP code: " + response1.code());
+	            System.out.println("HTTP code VILIBETS: " + response1.code());
 	            
 	            if (response1.body() != null) {
+	            	System.out.println("VILIBETS: TENEMOS BODY");
 	                String responseBody = response1.body().string();
+	                if(response1.code()>200) {
+	                	System.out.println(responseBody);
+	                }
 	            	
 	                return responseBody;
 	                

@@ -22,7 +22,7 @@ public class AlertasFactory {
 			mensaje.append("<b>👉👉👉 V I L I B E T 👈👈👈").append("</b>\n\n");
 		}
 		if(ninja) {
-			mensaje.append("<b>👉👉👉 N I N J A B E T 👈👈👈").append("</b>\n\n");
+			mensaje.append("<b>👉👉 N I N J A B E T 👈👈").append("</b>\n\n");
 		}
     	
 		 if(odd.getNivelAlerta()==1) {

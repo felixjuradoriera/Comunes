@@ -25,6 +25,7 @@ import dto.ViliOdd;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import telegram.TelegramSender;
 
 public class ViliBetsService {
 	
@@ -37,12 +38,13 @@ public class ViliBetsService {
 		 	String response= crearPeticionData("", Configuracion.urlDataVilibets);
 		 	
 		 	ArrayList<ViliOdd> odds = new ArrayList<>();
+		 	 
 	    	
 		 	if(!response.isEmpty()) {
 		 		ObjectMapper mapper = new ObjectMapper();
 
 	            Root root = mapper.readValue(response, Root.class);
-	            
+	           
 	            for (ViliOdd odd : root.odds) {
 	            	
 	            	odd.setSport(root.sports.get(odd.s));
@@ -87,13 +89,13 @@ public class ViliBetsService {
 	            					double resultadoFinal=probDec.doubleValue();
 	            					            					
 	            					odd.setRating(resultadoFinal);
+	            					if(odd.getRating()<TelegramSender.ratioMin) {
+	            						TelegramSender.ratioMin=odd.getRating();
+	            					}
 	            					            					
-	            					System.out.println(""+ odd.getBookie1()+"-" + odd.getBookie2()+"-" + odd.getBookie3() );
-	            					System.out.println(""+ odd.getEvent());
-	            					System.out.println(""+ odd.getO1()+"-" + odd.getO2()+"-" + odd.getO3() );
-	            					
 	            					if(odd.getBookie1()!=null && odd.getBookie2()!=null && odd.getBookie3()!=null) {
 	            						odds.add(odd);	
+	            						TelegramSender.conteoFiltrado++;
 	            					}
 	            					
 	            				}
@@ -102,7 +104,7 @@ public class ViliBetsService {
 	            		
 	            	}
 	            	           	
-	               	      	
+	            	TelegramSender.conteo++;    	
 	               }
 		 	}
 		 	
@@ -114,8 +116,7 @@ public class ViliBetsService {
 		 		oddsNinja.add(map);
 			}
 		 	
-		 	
-		 	return oddsNinja;
+		 return oddsNinja;
 	    	
 	    }
 	 

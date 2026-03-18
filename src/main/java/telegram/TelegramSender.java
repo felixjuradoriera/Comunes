@@ -27,6 +27,9 @@ public class TelegramSender {
     public static Integer eventosIniciales=0;
     public static Integer eventosFinales=0;
     public static Integer alertasEnviadas=0;
+    public static Integer conteo=0;
+    public static Integer conteoFiltrado=0;
+    public static Double ratioMin=100.0;
     
     /*  ESTE METODO NO SE UTILIZA*/
     public static void sendTelegramMessage(String text) {

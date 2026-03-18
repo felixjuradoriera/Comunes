@@ -176,7 +176,7 @@ public class NinjaService {
 		                    }
 		                    odd.setNivelAlerta(nivelAlerta);
 		                    
-		                    
+		                    odd.setTipoOdd("N");
 		                    lectura.add(odd);
 		                }
 		                

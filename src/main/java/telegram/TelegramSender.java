@@ -73,6 +73,9 @@ public class TelegramSender {
     
     public static void sendTelegramMessageAlerta(String text , Odd odd, String chatId) {
         
+    	boolean vili=odd.getTipoOdd().equals("V")?true:false;
+	 	boolean ninja=odd.getTipoOdd().equals("N")?true:odd.getTipoOdd().isEmpty()?true:false;
+    	
             try {
                 String urlString = "https://api.telegram.org/bot" + Configuracion.BOT_TOKEN + "/sendMessage";
                 URL url = new URL(urlString);
@@ -102,19 +105,38 @@ public class TelegramSender {
                             + "}";
                 	
                 } else {
-                	 json = "{"
-                             + "\"chat_id\":\"" + chatId + "\","
-                             + "\"text\":\"" + text.replace("\"", "\\\"") + "\","
-                             + "\"parse_mode\":\"HTML\","
-                             + "\"disable_web_page_preview\":true,"
-                             + "\"reply_markup\":{"
-                             + "   \"inline_keyboard\":["
-                             + "       [{\"text\":\"❌ Quitar este evento de tus alertas\",\"callback_data\":\""+ callBackData +"\"}],"
-                             + "       [{\"text\":\"Consultar Opciones 2WAY\",\"callback_data\":\""+ callBackData2WAY +"\"}]"
-                             + botonesEntrar
-                             + "   ]"
-                             + "}"
-                             + "}";
+                	 if(ninja) {               	
+	                	 json = "{"
+	                             + "\"chat_id\":\"" + chatId + "\","
+	                             + "\"text\":\"" + text.replace("\"", "\\\"") + "\","
+	                             + "\"parse_mode\":\"HTML\","
+	                             + "\"disable_web_page_preview\":true,"
+	                             + "\"reply_markup\":{"
+	                             + "   \"inline_keyboard\":["
+	                             + "       [{\"text\":\"❌ Quitar este evento de tus alertas\",\"callback_data\":\""+ callBackData +"\"}],"
+	                             + "       [{\"text\":\"Consultar Opciones 2WAY\",\"callback_data\":\""+ callBackData2WAY +"\"}]"
+	                             + botonesEntrar
+	                             + "   ]"
+	                             + "}"
+	                             + "}";
+                	 }
+                	 
+                	 if(vili) {    
+                		 json = "{"
+	                             + "\"chat_id\":\"" + chatId + "\","
+	                             + "\"text\":\"" + text.replace("\"", "\\\"") + "\","
+	                             + "\"parse_mode\":\"HTML\","
+	                             + "\"disable_web_page_preview\":true,"
+	                             + "\"reply_markup\":{"
+	                             + "   \"inline_keyboard\":["
+	                             + "       [{\"text\":\"❌ Quitar este evento de tus alertas\",\"callback_data\":\""+ callBackData +"\"}]"
+	                                                          
+	                             + "   ]"
+	                             + "}"
+	                             + "}";
+                		 
+                	 }
+                	 
                 }
                 
                
@@ -144,6 +166,81 @@ public class TelegramSender {
             }
        
     }
+    
+    public static void sendTelegramMessageAlertaViliBet(String text , Odd odd, String chatId) {
+        
+        try {
+            String urlString = "https://api.telegram.org/bot" + Configuracion.BOT_TOKEN + "/sendMessage";
+            URL url = new URL(urlString);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setDoOutput(true);
+            conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+            
+            String callBackData="excluir" + "|" + odd.getIdOdd() ;
+            String callBackData2WAY="way" + "|" + odd.getIdOdd() ;
+            
+            String botonesEntrar="";
+            String callBackEntrar="";
+            
+            for (Odd oddFusion : odd.getOddsFusion()) {
+            	callBackEntrar="entrar" + "|" + oddFusion.getIdOdd();
+				botonesEntrar+=",[{\"text\":\"Entrar "+ AlertasFactory.getNombreBookie(oddFusion.getBookie())  + "\",\"callback_data\":\""+ callBackEntrar +"\"}]";
+			}
+
+           String json="";
+            if(chatId.equals("-1003064907759")) {
+            	json = "{"
+                        + "\"chat_id\":\"" + chatId + "\","
+                        + "\"text\":\"" + text.replace("\"", "\\\"") + "\","
+                        + "\"parse_mode\":\"HTML\","
+                        + "\"disable_web_page_preview\":true"
+                        + "}";
+            	
+            } else {
+            	 json = "{"
+                         + "\"chat_id\":\"" + chatId + "\","
+                         + "\"text\":\"" + text.replace("\"", "\\\"") + "\","
+                         + "\"parse_mode\":\"HTML\","
+                         + "\"disable_web_page_preview\":true,"
+                         + "\"reply_markup\":{"
+                         + "   \"inline_keyboard\":["
+                         + "       [{\"text\":\"❌ Quitar este evento de tus alertas\",\"callback_data\":\""+ callBackData +"\"}],"
+                         + "       [{\"text\":\"Consultar Opciones 2WAY\",\"callback_data\":\""+ callBackData2WAY +"\"}]"
+                         + botonesEntrar
+                         + "   ]"
+                         + "}"
+                         + "}";
+            }
+            
+           
+
+            try (OutputStream os = conn.getOutputStream()) {
+                os.write(json.getBytes(StandardCharsets.UTF_8));
+            }
+
+            int responseCode = conn.getResponseCode();
+            if(responseCode==400) {
+            	response400Telegram++;	
+            }
+            System.out.println("📩 Telegram response: " + responseCode);
+
+            try (BufferedReader in = new BufferedReader(
+                    new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
+                String line;
+                StringBuilder response = new StringBuilder();
+                while ((line = in.readLine()) != null) {
+                    response.append(line);
+                }
+                System.out.println("📩 Respuesta Telegram: " + response);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+   
+}
+    
     
     public static void sendTelegramMessageAlertaMover(String text , Odd odd, String chatId) {
         

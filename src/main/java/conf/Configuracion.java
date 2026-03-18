@@ -39,7 +39,7 @@ public class Configuracion {
 	public static String urlData = "https://www.ninjabet.es/get_data_sp.php";
 	public static String urlEvents = "https://www.ninjabet.es/get_events_sp.php";
 	public static String urlExchange = "https://ero.betfair.es/www/sports/exchange/readonly/v1/bymarket";
-
+	
 	public static Integer FiltroMinutosAntiguedad = 20;
 	public static Double restaCuotaCodere = 0.05;
 
@@ -68,6 +68,25 @@ public class Configuracion {
 	public static ArrayList<String> filtroApuestasHome = new ArrayList<String>(Arrays.asList("home"));
 	public static ArrayList<String> filtroApuestasDraw = new ArrayList<String>(Arrays.asList("draw"));
 	public static ArrayList<String> filtroApuestasAway = new ArrayList<String>(Arrays.asList("away"));
+	
+	
+	public static String urlDataVilibets = "https://widgets.scrapebet.com/dutcher-full/6324e6ce518a3317260083a2?uid=Rubio";
+	public static final String CONF_VILI = "C:" + File.separator + "BOT" + File.separator + "CONF" + File.separator + "confVili.txt";
+	
+	public static ArrayList<String> bookiesVili = new ArrayList<>();
+	static {
+	    bookiesVili.add("Bet365");
+	    bookiesVili.add("Bwin");
+	    bookiesVili.add("Kirolbet");
+	    //bookiesVili.add("Betfair Exchange");
+	    
+	}
+	
+	public static ArrayList<String> ligasVili = new ArrayList<>();
+	static {
+	    //ligasVili.add("Bundesliga / Alemania");
+	    ligasVili.add("Ligue 1 / Francia");
+	}
 
 	
 	

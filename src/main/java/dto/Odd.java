@@ -48,10 +48,27 @@ public class Odd {
         Double bookieWins=0.0;
         Double ExchangeWins=0.0;
         
-        ArrayList<Odd> cierres=new ArrayList<Odd>();       
+        ArrayList<Odd> cierres=new ArrayList<Odd>();
         
-        
+        String tipoOdd="";
+                
         private LocalDateTime fechaAlerta;
+        
+        //formato VILIBET
+        private String bookie1;
+        private String bookie2;
+        private String bookie3;
+        private Double odd1;
+        private Double odd2;
+        private Double odd3;
+        private String selection1;
+        private String selection2;
+        private String selection3;
+        
+        
+        
+        
+        
 
         // getters y setters
         public String getEvent() { return event; }
@@ -223,8 +240,67 @@ public class Odd {
 		public void setStakeEarly(Double stakeEarly) {
 			this.stakeEarly = stakeEarly;
 		}
+		public String getTipoOdd() {
+			return tipoOdd;
+		}
+		public void setTipoOdd(String tipoOdd) {
+			this.tipoOdd = tipoOdd;
+		}
+		public String getBookie1() {
+			return bookie1;
+		}
+		public void setBookie1(String bookie1) {
+			this.bookie1 = bookie1;
+		}
+		public String getBookie2() {
+			return bookie2;
+		}
+		public void setBookie2(String bookie2) {
+			this.bookie2 = bookie2;
+		}
+		public String getBookie3() {
+			return bookie3;
+		}
+		public void setBookie3(String bookie3) {
+			this.bookie3 = bookie3;
+		}
+		public Double getOdd1() {
+			return odd1;
+		}
+		public void setOdd1(Double odd1) {
+			this.odd1 = odd1;
+		}
+		public Double getOdd2() {
+			return odd2;
+		}
+		public void setOdd2(Double odd2) {
+			this.odd2 = odd2;
+		}
+		public Double getOdd3() {
+			return odd3;
+		}
+		public void setOdd3(Double odd3) {
+			this.odd3 = odd3;
+		}
+		public String getSelection1() {
+			return selection1;
+		}
+		public void setSelection1(String selection1) {
+			this.selection1 = selection1;
+		}
+		public String getSelection2() {
+			return selection2;
+		}
+		public void setSelection2(String selection2) {
+			this.selection2 = selection2;
+		}
+		public String getSelection3() {
+			return selection3;
+		}
+		public void setSelection3(String selection3) {
+			this.selection3 = selection3;
+		}
 		
-		
-		
+				
         
     }

@@ -29,7 +29,22 @@ public class OddsCSVUtils {
                 pw.println(String.join(";",
                         o.getEvent(), o.getBookie(), o.getRating(), o.getBackOdd(),
                         o.getLayOdd(), o.getSelection(), o.getCompetition(),
-                        o.getUpdate_time(), o.getCountry(), o.getTimeInMin().toString(), fechaFormateada, String.valueOf(o.getIdOdd()), o.getsFechaPartido(), o.getMarket_id(),String.valueOf(o.getStakeEntradaBookie()), String.valueOf(o.getStakeEntradaExchange()),String.valueOf(o.getBookieWins()),String.valueOf(o.getExchangeWins()),String.valueOf(o.getPorcEarly()),String.valueOf(o.getStakeEarly()),String.valueOf(o.getBackOddEarly())));
+                        o.getUpdate_time(), o.getCountry(),
+                        o.getTimeInMin().toString(), 
+                        fechaFormateada, 
+                        String.valueOf(o.getIdOdd()), 
+                        o.getsFechaPartido(), 
+                        o.getMarket_id(),
+                        String.valueOf(o.getStakeEntradaBookie()),
+                        String.valueOf(o.getStakeEntradaExchange()),
+                        String.valueOf(o.getBookieWins()),
+                        String.valueOf(o.getExchangeWins()),
+                        String.valueOf(o.getPorcEarly()),
+                        String.valueOf(o.getStakeEarly()),
+                        String.valueOf(o.getBackOddEarly()),
+                        String.valueOf(o.getTipoOdd())
+                        
+                		));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -110,6 +125,35 @@ public class OddsCSVUtils {
                 if (campos.length >= 21) {
                 	o.setBackOddEarly((Double.valueOf(campos[20])));                          
                 	               	
+                }
+                
+                if (campos.length >= 22) {
+                	o.setTipoOdd(campos[21]);                        
+                	               	
+                } else {
+                	o.setTipoOdd("N");
+                }
+                
+                if (o.getTipoOdd().equals("V")) {
+                	
+                	String cadena = o.getBookie();
+                	String[] partes = cadena.split("-");
+                	o.setBookie1(partes[0]);
+                	o.setBookie2(partes[1]);
+                	o.setBookie3(partes[2]);
+                	
+                	cadena = o.getBackOdd();    	
+                	partes =cadena.split("-");
+                	o.setOdd1(Double.valueOf(partes[0]));
+                	o.setOdd2(Double.valueOf(partes[1]));
+                	o.setOdd3(Double.valueOf(partes[2]));
+                	
+                	cadena = o.getSelection();
+                	partes =cadena.split("-");
+                	o.setSelection1(partes[0]);
+                	o.setSelection2(partes[1]);
+                	o.setSelection3(partes[2]);
+                	                	
                 }
                 
                 lista.add(o);

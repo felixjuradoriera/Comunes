@@ -94,8 +94,10 @@ public class ViliBetsService {
 	            					}
 	            					            					
 	            					if(odd.getBookie1()!=null && odd.getBookie2()!=null && odd.getBookie3()!=null) {
+	            						if(odd.getRating()>=97 && odd.getO1()>=1.5 && odd.getO2()>=1.5 && odd.getO3()>=1.5) {
 	            						odds.add(odd);	
 	            						TelegramSender.conteoFiltrado++;
+	            						}
 	            					}
 	            					
 	            				}

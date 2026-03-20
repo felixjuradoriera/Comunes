@@ -32,7 +32,7 @@ public class ViliBetsService {
 	public static Integer codeRespuesta = 0;
 	
 
-	 public static ArrayList<Odd> mapearListaResultadosData(List<String> bookiesVili,List<String> ligasVili, String urlPeticion, boolean inicial) throws JsonMappingException, JsonProcessingException { 
+	 public static ArrayList<Odd> mapearListaResultadosData(List<String> bookies2UP,List<String> bookiesExcluidas,List<String> ligasVili, String urlPeticion, boolean inicial) throws JsonMappingException, JsonProcessingException { 
 	    	
 		 
 		 	String response= crearPeticionData("", Configuracion.urlDataVilibets);
@@ -68,17 +68,23 @@ public class ViliBetsService {
 	            	
 	            	//filtro ligas/bookies
 	            	if(ligasVili.contains(odd.getLeague())) {
-	            		if(odd.getBookie1() == null || odd.getBookie1().isEmpty() || bookiesVili.contains(odd.getBookie1())) {
-	            			if(odd.getBookie2() == null || odd.getBookie2().isEmpty() || bookiesVili.contains(odd.getBookie2())) {
-	            				if(odd.getBookie3() == null || odd.getBookie3().isEmpty() || bookiesVili.contains(odd.getBookie3())) {
+	            		if(odd.getBookie1() == null || odd.getBookie1().isEmpty() || bookies2UP.contains(odd.getBookie1())) {
+	            			if(odd.getBookie2() == null || odd.getBookie2().isEmpty() || ( !odd.getBookie2().isEmpty() && !bookiesExcluidas.contains(odd.getBookie2()))) {
+	            				if(odd.getBookie3() == null || odd.getBookie3().isEmpty() || bookies2UP.contains(odd.getBookie3())) {
 	            					
 	            					if(odd.getO1o()>0)
 	            						odd.setO1(odd.getO1o());
 	            					if(odd.getO2o()>0)
-	            						odd.setO2(odd.getO2o());
+	            						odd.setBookie2(odd.getBookie2()+ "(+)");
 	            					if(odd.getO3o()>0)
 	            						odd.setO3(odd.getO3o());
 	            					
+	            					//Corrección comision Betfair Exchange
+	            					if(odd.getBookie2()!=null  && odd.getBookie2().equals("Betfair Exchange")) {
+	            						odd.setBookie2("Bet Exchange"+ "(-)");
+	            						odd.setO2(odd.getO2()*0.98);
+	            					}
+	            						            					
 	            					Double prob1=odd.getO1()>0?1/odd.getO1():0;
 	            					Double prob2=odd.getO2()>0?1/odd.getO2():0;
 	            					Double prob3=odd.getO3()>0?1/odd.getO3():0;

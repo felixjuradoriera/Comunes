@@ -142,7 +142,7 @@ public class TelegramSender {
                 	 
                 }
                 
-               
+                System.out.println("📩 Telegram JSON: " + json);
 
                 try (OutputStream os = conn.getOutputStream()) {
                     os.write(json.getBytes(StandardCharsets.UTF_8));

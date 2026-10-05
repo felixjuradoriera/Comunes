@@ -66,11 +66,15 @@ public class ViliBetsService {
 	            		//System.out.println("x");
 	            	}
 	            	
+	            	//if(((odd.getBookie1()!=null && odd.getBookie1().equalsIgnoreCase("versus")) || (odd.getBookie3()!=null && odd.getBookie3().equalsIgnoreCase("versus"))) && ligasVili.contains(odd.getLeague())  && bookies2UP.contains(odd.getBookie1().toLowerCase()) && bookies2UP.contains(odd.getBookie3().toLowerCase())) {
+	            		//System.out.println("pause");
+	            	//}
+	            	
 	            	//filtro ligas/bookies
 	            	if(ligasVili.contains(odd.getLeague())) {
-	            		if(odd.getBookie1() == null || odd.getBookie1().isEmpty() || bookies2UP.contains(odd.getBookie1())) {
-	            			if(odd.getBookie2() == null || odd.getBookie2().isEmpty() || ( !odd.getBookie2().isEmpty() && !bookiesExcluidas.contains(odd.getBookie2()))) {
-	            				if(odd.getBookie3() == null || odd.getBookie3().isEmpty() || bookies2UP.contains(odd.getBookie3())) {
+	            		if(odd.getBookie1() == null || odd.getBookie1().isEmpty() || bookies2UP.contains(odd.getBookie1().toLowerCase())) {
+	            			if(odd.getBookie2() == null || odd.getBookie2().isEmpty() || ( !odd.getBookie2().isEmpty() && !bookiesExcluidas.contains(odd.getBookie2().toLowerCase()))) {
+	            				if(odd.getBookie3() == null || odd.getBookie3().isEmpty() || bookies2UP.contains(odd.getBookie3().toLowerCase())) {
 	            					
 	            					if(odd.getO1o()>0)
 	            						odd.setO1(odd.getO1o());

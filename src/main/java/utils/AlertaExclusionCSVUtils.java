@@ -113,7 +113,9 @@ public class AlertaExclusionCSVUtils {
 	
 	
 	public static void escribirAlertasEnCsv(List<AlertaExclusion> alertas) {
-	    try (BufferedWriter writer = new BufferedWriter(new FileWriter(CSV_EXCLUDE_ALERTS, false))) {
+		try (BufferedWriter writer = Files.newBufferedWriter(
+		        Paths.get(CSV_EXCLUDE_ALERTS),
+		        StandardCharsets.UTF_8)) {
 	        // Cabecera opcional:
 	        // writer.write("chatId,market_id,sFechaPartido,evento");
 	        // writer.newLine();

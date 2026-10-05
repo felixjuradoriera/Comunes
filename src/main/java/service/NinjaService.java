@@ -218,15 +218,49 @@ public class NinjaService {
 	 public static StringBuilder crearPeticionData(String urlParameters, String urlConexion) {
 	    	StringBuilder response = new StringBuilder();
 	        try {
-	    	byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
+	        	 String json =
+	        		        "{"
+	        		        + "\"bet_amount\":100,"
+	        		        + "\"exchange_ids\":[10],"
+	        		        + "\"matcher_type\":\"oddsmatcher\","
+	        		        + "\"mode\":\"realmoney\","
+	        		        + "\"order_by\":\"rating\","
+	        		        + "\"offset\":7,"
+	        		        + "\"pagesize\":10,"
+	        		        + "\"pids\":["
+	        		        + "73,87,2,147,3,5,10,12,95,20,24,27,146,30,"
+	        		        + "24,37,41,43,30,204,143,170,49,50,147,147,151,"
+	        		        + "63,144,24,72,24,74,76,145,85,90,100,104,107,109,"
+	        		        + "105,204,119"
+	        		        + "]"
+	        		        + "}";
+	        	
+	        	byte[] postData = json.getBytes(StandardCharsets.UTF_8);
+	        	
 
 	        URL obj = new URL(urlConexion);
 	        HttpURLConnection conn = (HttpURLConnection) obj.openConnection();
 	        conn.setRequestMethod("POST");
-	        conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-	        conn.setRequestProperty("Content-Length", String.valueOf(postData.length));
-	        conn.setRequestProperty("User-Agent", "Mozilla/5.0");
-	        conn.setRequestProperty("Referer", "https://www.ninjabet.es/oddsmatcher");
+
+	        conn.setRequestProperty("Content-Type", "application/json");
+	        conn.setRequestProperty("Accept", "*/*");
+
+	        conn.setRequestProperty("Origin", "https://ninjabet.es");
+	        conn.setRequestProperty("Referer", "https://ninjabet.es/");
+
+	        conn.setRequestProperty("X-Requested-With", "XMLHttpRequest");
+
+	        conn.setRequestProperty("User-Agent",
+	            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
+	            "AppleWebKit/537.36 (KHTML, like Gecko) " +
+	            "Chrome/151.0.0.0 Safari/537.36");
+	        
+	        //COOKIE DE USUARIO CONEXION NINJABET
+	        conn.setRequestProperty(
+	                "X-Session-Token",
+	                "rbp237lpaosd2u5010r7d9hp8ppkg4cn"
+	            );
+	        //conn.setRequestProperty("Cookie", "wordpress_logged_in_857063511be8eb23973bf623342b5242=iitzmarc22%40gmail.com%7C1795347465%7CvK1lt18OR044NADceCubYMUb1FKPj28tmcypVM2C0Jt%7C5b37b51e0fed14685abe23e382eacacea41568bc9077a15ec1340a1f81065b6e");
 
 	        conn.setDoOutput(true);
 	        try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream())) {

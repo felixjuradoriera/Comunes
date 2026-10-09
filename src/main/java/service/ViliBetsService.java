@@ -29,7 +29,6 @@ import telegram.TelegramSender;
 
 public class ViliBetsService {
 	
-	public static Integer codeRespuesta = 0;
 	
 
 	 public static ArrayList<Odd> mapearListaResultadosData(List<String> bookies2UP,List<String> bookiesExcluidas,List<String> ligasVili, String urlPeticion, boolean inicial) throws JsonMappingException, JsonProcessingException { 

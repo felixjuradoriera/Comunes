@@ -121,13 +121,6 @@ public class TelegramSender {
     // Métodos públicos (misma firma que antes)
     // ============================================================
 
-    /*  ESTE METODO NO SE UTILIZA*/
-    public static void sendTelegramMessage(String text) {
-    	for (String chatId : Configuracion.CHAT_IDS) {
-    		enviar(Configuracion.BOT_TOKEN, crearPayload(chatId, text));
-    	}
-    }
-
     public static void sendTelegramMessageAlerta(String text , Odd odd, String chatId) {
     	boolean vili=odd.getTipoOdd().equals("V");
     	boolean ninja=odd.getTipoOdd().equals("N") || odd.getTipoOdd().isEmpty();
@@ -144,19 +137,6 @@ public class TelegramSender {
     			ArrayNode teclado = addTeclado(payload);
     			addBoton(teclado, "❌ Quitar este evento de tus alertas", "excluir" + "|" + odd.getIdOdd());
     		}
-    	}
-
-    	enviar(Configuracion.BOT_TOKEN, payload);
-    }
-
-    public static void sendTelegramMessageAlertaViliBet(String text , Odd odd, String chatId) {
-    	ObjectNode payload = crearPayload(chatId, text);
-
-    	if(!chatId.equals(CHAT_GRUPAL)) {
-    		ArrayNode teclado = addTeclado(payload);
-    		addBoton(teclado, "❌ Quitar este evento de tus alertas", "excluir" + "|" + odd.getIdOdd());
-    		addBoton(teclado, "Consultar Opciones 2WAY", "way" + "|" + odd.getIdOdd());
-    		addBotonesEntrar(teclado, odd);
     	}
 
     	enviar(Configuracion.BOT_TOKEN, payload);

@@ -1,10 +1,8 @@
 package utils;
 
 import conf.Configuracion;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -21,20 +19,5 @@ public class DatosPruebasUtils {
 	    }
 	}
 
-	
-	
-	public static StringBuilder leerJsonDeArchivo() {
-	    StringBuilder contenido = new StringBuilder();
-	    try (BufferedReader reader = new BufferedReader(new FileReader(JSON_FILE))) {
-	        String linea;
-	        while ((linea = reader.readLine()) != null) {
-	            contenido.append(linea).append("\n");
-	        }
-	        System.out.println("✅ JSON leído de: " + JSON_FILE);
-	    } catch (IOException e) {
-	        e.printStackTrace();
-	    }
-	    return contenido;
-	}
 	
 }

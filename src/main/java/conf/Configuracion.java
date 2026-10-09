@@ -75,10 +75,6 @@ public class Configuracion {
    		+ "&bet-type=&rating-type=normal&roll-real-money=100&roll-bonus=100&roll-remaining=100&roll-rating=95&tz=-60";
     
     
-   // private static final String[] CHAT_IDS = {"403482161","-1003064907759"};
-    /*  ESTE METODO NO SE UTILIZA*/
-	public static final String[] CHAT_IDS = {"403482161"};  //<-- este soy yo
-  // public static final String[] CHAT_IDS = {"-1003064907759"}; //<-- este es el chat grupal
 	
 	public static final String[] CHAT_IDS_MOVER = {"403482161"};  //<-- este soy yo
     
@@ -104,8 +100,6 @@ public class Configuracion {
 	public static String ratingNivel2 = "92";
 	public static String cuotaMinimaInicial = "2.5";
 	public static String cuotaMinima = "2.5";
-	public static String cuotaNivel1 = "2.5";
-	public static String cuotaNivel2 = "5";
 
 	public static Double nCuotaMinima = Double.valueOf(cuotaMinima);
 	public static Double ratingNivel1Minimo = Double.valueOf(ratingNivel1);
@@ -129,20 +123,6 @@ public class Configuracion {
 	public static String urlDataVilibets = secret("VILIBETS_URL");
 	public static final String CONF_VILI = BASE_DIR + File.separator + "confVili.txt";
 	
-	public static ArrayList<String> bookiesVili = new ArrayList<>();
-	static {
-	    bookiesVili.add("Bet365");
-	    bookiesVili.add("Bwin");
-	    bookiesVili.add("Kirolbet");
-	    //bookiesVili.add("Betfair Exchange");
-	    
-	}
-	
-	public static ArrayList<String> ligasVili = new ArrayList<>();
-	static {
-	    //ligasVili.add("Bundesliga / Alemania");
-	    ligasVili.add("Ligue 1 / Francia");
-	}
 
 	
 	

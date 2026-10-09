@@ -4,7 +4,6 @@ import conf.Configuracion;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -25,7 +24,6 @@ import dto.AlertaExclusion;
 public class AlertaExclusionCSVUtils {
 	
 	private static final String CSV_EXCLUDE_ALERTS = Configuracion.BASE_DIR + File.separator + "alertasExclusiones.csv";
-	public static Integer codeRespuesta = 0;
 
 	/**
 	 * Añade un objeto AlertaExclusion al CSV si no existe ya con mismo chatId y

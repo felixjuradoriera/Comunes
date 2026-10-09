@@ -255,12 +255,12 @@ public class NinjaService {
 	            "AppleWebKit/537.36 (KHTML, like Gecko) " +
 	            "Chrome/151.0.0.0 Safari/537.36");
 	        
-	        //COOKIE DE USUARIO CONEXION NINJABET
-	        conn.setRequestProperty(
-	                "X-Session-Token",
-	                "rbp237lpaosd2u5010r7d9hp8ppkg4cn"
-	            );
-	        //conn.setRequestProperty("Cookie", "wordpress_logged_in_857063511be8eb23973bf623342b5242=iitzmarc22%40gmail.com%7C1795347465%7CvK1lt18OR044NADceCubYMUb1FKPj28tmcypVM2C0Jt%7C5b37b51e0fed14685abe23e382eacacea41568bc9077a15ec1340a1f81065b6e");
+	        //TOKEN DE SESIÓN DE USUARIO NINJABET (bot.properties: NINJA_SESSION_TOKEN)
+	        if (Configuracion.NINJA_SESSION_TOKEN != null) {
+	        	conn.setRequestProperty("X-Session-Token", Configuracion.NINJA_SESSION_TOKEN);
+	        } else {
+	        	System.out.println("❌ Falta NINJA_SESSION_TOKEN en bot.properties: la petición a Ninjabet fallará");
+	        }
 
 	        conn.setDoOutput(true);
 	        try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream())) {

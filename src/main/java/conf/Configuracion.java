@@ -53,6 +53,18 @@ public class Configuracion {
 
 	public static final String BOT_TOKEN       = secrets.getProperty("BOT_TOKEN");
 	public static final String BOT_TOKEN_MOVER = secrets.getProperty("BOT_TOKEN_MOVER");
+
+	// Token de sesión de Ninjabet (cabecera X-Session-Token)
+	public static final String NINJA_SESSION_TOKEN = secret("NINJA_SESSION_TOKEN");
+
+	// Devuelve el valor de bot.properties sin espacios, o null si no está o está vacío
+	private static String secret(String clave) {
+		String valor = secrets.getProperty(clave);
+		if (valor == null || valor.trim().isEmpty()) {
+			return null;
+		}
+		return valor.trim();
+	}
    
    public static final String urlMover="combinazioni=2&action=get_odds_data&uid=" + secrets.getProperty("NINJA_UID") + "&refund=100&"
    		+ "back_stake=100&filterbookies%5B%5D=104&filterbookies%5B%5D=20"
@@ -113,7 +125,8 @@ public class Configuracion {
 	public static ArrayList<String> filtroApuestasAway = new ArrayList<String>(Arrays.asList("away"));
 	
 	
-	public static String urlDataVilibets = "https://widgets.scrapebet.com/dutcher-full/6324e6ce518a3317260083a2?uid=Rubio";
+	// URL del dutcher de Vilibets (incluye el uid) -> bot.properties: VILIBETS_URL
+	public static String urlDataVilibets = secret("VILIBETS_URL");
 	public static final String CONF_VILI = BASE_DIR + File.separator + "confVili.txt";
 	
 	public static ArrayList<String> bookiesVili = new ArrayList<>();

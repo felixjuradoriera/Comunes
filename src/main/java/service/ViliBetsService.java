@@ -205,10 +205,15 @@ public class ViliBetsService {
 	    	StringBuilder response = new StringBuilder();
 	    	
 	    	
+	    	if (urlConexion == null || urlConexion.isBlank()) {
+	    		System.out.println("❌ Falta VILIBETS_URL en bot.properties: no se consulta Vilibets");
+	    		return "";
+	    	}
+	    	
 	    	OkHttpClient client = new OkHttpClient();
 
 	        Request request = new Request.Builder()
-	                .url("https://widgets.scrapebet.com/dutcher-full/6324e6ce518a3317260083a2?uid=Rubio")
+	                .url(urlConexion)
 	                .post(okhttp3.RequestBody.create(new byte[0]))
 	                .addHeader("Accept", "application/json")
 	                .addHeader("Content-Type", "application/json")

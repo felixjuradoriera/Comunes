@@ -1,4 +1,6 @@
 package utils;
+
+import conf.Configuracion;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -17,7 +19,7 @@ import dto.ConfAlerta;
 
 public class ConfAlertasCSVUtils {
 	
-	private static final String CSV_CONFIGURE_ALERTS = "C:"+ File.separator +"BOT" + File.separator +"CONF"+File.separator+ "configuracionAlertas.csv";
+	private static final String CSV_CONFIGURE_ALERTS = Configuracion.BASE_DIR + File.separator + "configuracionAlertas.csv";
 
 	/**
 	 * Añade un objeto AlertaExclusion al CSV si no existe ya con mismo chatId y

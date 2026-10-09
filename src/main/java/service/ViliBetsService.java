@@ -85,7 +85,7 @@ public class ViliBetsService {
 	            					
 	            					//Corrección comision Betfair Exchange
 	            					if(odd.getBookie2()!=null  && odd.getBookie2().equals("Betfair Exchange")) {
-	            						odd.setBookie2("Bet Exchange"+ "(-)");
+	            						odd.setBookie2("Bet Exchange(B)");
 	            						odd.setO2(odd.getO2()*0.98);
 	            					}
 	            						            					

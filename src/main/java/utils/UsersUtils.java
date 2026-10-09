@@ -1,4 +1,6 @@
 package utils;
+
+import conf.Configuracion;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -15,7 +17,7 @@ import dto.User;
 public class UsersUtils {
 	
 	
-	private static final String CSV_USERS = "C:"+ File.separator +"BOT" + File.separator +"CONF"+File.separator+ "users.csv";
+	private static final String CSV_USERS = Configuracion.BASE_DIR + File.separator + "users.csv";
 	
 	
 	

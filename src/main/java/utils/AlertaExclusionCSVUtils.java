@@ -1,4 +1,6 @@
 package utils;
+
+import conf.Configuracion;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -22,7 +24,7 @@ import dto.AlertaExclusion;
 
 public class AlertaExclusionCSVUtils {
 	
-	private static final String CSV_EXCLUDE_ALERTS = "C:"+ File.separator +"BOT" + File.separator +"CONF"+File.separator+ "alertasExclusiones.csv";
+	private static final String CSV_EXCLUDE_ALERTS = Configuracion.BASE_DIR + File.separator + "alertasExclusiones.csv";
 	public static Integer codeRespuesta = 0;
 
 	/**

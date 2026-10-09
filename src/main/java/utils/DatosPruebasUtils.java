@@ -1,4 +1,6 @@
 package utils;
+
+import conf.Configuracion;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -8,7 +10,7 @@ import java.io.IOException;
 
 public class DatosPruebasUtils {
 	
-	private static final String JSON_FILE = "C:"+ File.separator +"BOT" + File.separator +"CONF"+File.separator+ "datosPruebas.json";
+	private static final String JSON_FILE = Configuracion.BASE_DIR + File.separator + "datosPruebas.json";
 	
 	public static void guardarJsonEnArchivo(StringBuilder json) {
 	    try (BufferedWriter writer = new BufferedWriter(new FileWriter(JSON_FILE))) {

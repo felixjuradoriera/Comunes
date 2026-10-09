@@ -1,13 +1,11 @@
 package telegram;
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Iterator;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,7 +19,7 @@ import utils.AlertasFactory;
 
 public class TelegramSender {
 
-       
+
     public static Integer response200_Inicial=0;
     public static Integer response200_Events=0;
     public static Integer response200_Adicional=0;
@@ -34,6 +32,9 @@ public class TelegramSender {
     public static Integer conteo=0;
     public static Integer conteoFiltrado=0;
     public static Double ratioMin=100.0;
+
+    // chat grupal: las alertas se envían sin botones
+    private static final String CHAT_GRUPAL = "-1003064907759";
 
     // ============================================================
     // Construcción del JSON para la API de Telegram con Jackson
@@ -60,380 +61,140 @@ public class TelegramSender {
     	boton.put("text", texto);
     	boton.put("callback_data", callback);
     }
-    
+
+    // botones "Entrar <bookie>" de cada odd fusionado
+    private static void addBotonesEntrar(ArrayNode teclado, Odd odd) {
+    	for (Odd oddFusion : odd.getOddsFusion()) {
+    		addBoton(teclado, "Entrar " + AlertasFactory.getNombreBookie(oddFusion.getBookie()), "entrar" + "|" + oddFusion.getIdOdd());
+    	}
+    }
+
+    // ============================================================
+    // Envío único a la API de Telegram (sendMessage)
+    // Devuelve el código HTTP, o -1 si ha fallado la conexión.
+    // ============================================================
+    private static int enviar(String botToken, ObjectNode payload) {
+    	try {
+    		String json = MAPPER.writeValueAsString(payload);
+
+    		URL url = new URL("https://api.telegram.org/bot" + botToken + "/sendMessage");
+    		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    		conn.setRequestMethod("POST");
+    		conn.setDoOutput(true);
+    		conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+
+    		try (OutputStream os = conn.getOutputStream()) {
+    			os.write(json.getBytes(StandardCharsets.UTF_8));
+    		}
+
+    		int responseCode = conn.getResponseCode();
+    		if(responseCode==400) {
+    			response400Telegram++;
+    		}
+    		System.out.println("📩 Telegram response: " + responseCode);
+
+    		// en caso de error Telegram explica el motivo en el cuerpo de la respuesta
+    		boolean ok = responseCode >= 200 && responseCode < 300;
+    		InputStream is = ok ? conn.getInputStream() : conn.getErrorStream();
+    		if (is != null) {
+    			try (BufferedReader in = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+    				String line;
+    				StringBuilder response = new StringBuilder();
+    				while ((line = in.readLine()) != null) {
+    					response.append(line);
+    				}
+    				System.out.println("📩 Respuesta Telegram: " + response);
+    			}
+    		}
+    		if (!ok) {
+    			System.out.println("📩 Telegram JSON enviado: " + json);
+    		}
+    		return responseCode;
+
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    		return -1;
+    	}
+    }
+
+    // ============================================================
+    // Métodos públicos (misma firma que antes)
+    // ============================================================
+
     /*  ESTE METODO NO SE UTILIZA*/
     public static void sendTelegramMessage(String text) {
-    	 for (String chatId : Configuracion.CHAT_IDS) {
-        try {
-            String urlString = "https://api.telegram.org/bot" + Configuracion.BOT_TOKEN + "/sendMessage";
-            String urlParameters = "chat_id=" + chatId
-                    + "&text=" + URLEncoder.encode(text, "UTF-8")
-                    + "&parse_mode=HTML" // HTML limitado
-                    + "&disable_web_page_preview=true";
-
-            byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-
-            URL url = new URL(urlString);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("POST");
-            conn.setDoOutput(true);
-
-            try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream())) {
-                wr.write(postData);
-            }
-
-            int responseCode = conn.getResponseCode();
-            if(responseCode==400) {
-            	response400Telegram++;	
-            }
-            System.out.println("📩 Telegram response: " + responseCode);
-
-            try (BufferedReader in = new BufferedReader(
-                    new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
-                String line;
-                StringBuilder response = new StringBuilder();
-                while ((line = in.readLine()) != null) {
-                    response.append(line);
-                }
-                System.out.println("📩 Respuesta Telegram: " + response);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    	 }
+    	for (String chatId : Configuracion.CHAT_IDS) {
+    		enviar(Configuracion.BOT_TOKEN, crearPayload(chatId, text));
+    	}
     }
-    
+
     public static void sendTelegramMessageAlerta(String text , Odd odd, String chatId) {
-        
-    	boolean vili=odd.getTipoOdd().equals("V")?true:false;
-	 	boolean ninja=odd.getTipoOdd().equals("N")?true:odd.getTipoOdd().isEmpty()?true:false;
-    	
-            try {
-                String urlString = "https://api.telegram.org/bot" + Configuracion.BOT_TOKEN + "/sendMessage";
-                URL url = new URL(urlString);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("POST");
-                conn.setDoOutput(true);
-                conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-                
-                String callBackData="excluir" + "|" + odd.getIdOdd() ;
-                String callBackData2WAY="way" + "|" + odd.getIdOdd() ;
+    	boolean vili=odd.getTipoOdd().equals("V");
+    	boolean ninja=odd.getTipoOdd().equals("N") || odd.getTipoOdd().isEmpty();
 
-                ObjectNode payload = crearPayload(chatId, text);
+    	ObjectNode payload = crearPayload(chatId, text);
 
-                // el chat grupal no lleva botones
-                if(!chatId.equals("-1003064907759")) {
-                	if(ninja) {
-                		ArrayNode teclado = addTeclado(payload);
-                		addBoton(teclado, "❌ Quitar este evento de tus alertas", callBackData);
-                		addBoton(teclado, "Consultar Opciones 2WAY", callBackData2WAY);
-                		for (Odd oddFusion : odd.getOddsFusion()) {
-                			addBoton(teclado, "Entrar " + AlertasFactory.getNombreBookie(oddFusion.getBookie()), "entrar" + "|" + oddFusion.getIdOdd());
-                		}
-                	} else if(vili) {
-                		ArrayNode teclado = addTeclado(payload);
-                		addBoton(teclado, "❌ Quitar este evento de tus alertas", callBackData);
-                	}
-                }
+    	if(!chatId.equals(CHAT_GRUPAL)) {
+    		if(ninja) {
+    			ArrayNode teclado = addTeclado(payload);
+    			addBoton(teclado, "❌ Quitar este evento de tus alertas", "excluir" + "|" + odd.getIdOdd());
+    			addBoton(teclado, "Consultar Opciones 2WAY", "way" + "|" + odd.getIdOdd());
+    			addBotonesEntrar(teclado, odd);
+    		} else if(vili) {
+    			ArrayNode teclado = addTeclado(payload);
+    			addBoton(teclado, "❌ Quitar este evento de tus alertas", "excluir" + "|" + odd.getIdOdd());
+    		}
+    	}
 
-                String json = MAPPER.writeValueAsString(payload);
-
-                System.out.println("📩 Telegram JSON: " + json);
-
-                try (OutputStream os = conn.getOutputStream()) {
-                    os.write(json.getBytes(StandardCharsets.UTF_8));
-                }
-
-                int responseCode = conn.getResponseCode();
-                if(responseCode==400) {
-                	response400Telegram++;	
-                }
-                System.out.println("📩 Telegram response: " + responseCode);
-
-                try (BufferedReader in = new BufferedReader(
-                        new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
-                    String line;
-                    StringBuilder response = new StringBuilder();
-                    while ((line = in.readLine()) != null) {
-                        response.append(line);
-                    }
-                    System.out.println("📩 Respuesta Telegram: " + response);
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-       
+    	enviar(Configuracion.BOT_TOKEN, payload);
     }
-    
+
     public static void sendTelegramMessageAlertaViliBet(String text , Odd odd, String chatId) {
-        
-        try {
-            String urlString = "https://api.telegram.org/bot" + Configuracion.BOT_TOKEN + "/sendMessage";
-            URL url = new URL(urlString);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("POST");
-            conn.setDoOutput(true);
-            conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-            
-            String callBackData="excluir" + "|" + odd.getIdOdd() ;
-            String callBackData2WAY="way" + "|" + odd.getIdOdd() ;
+    	ObjectNode payload = crearPayload(chatId, text);
 
-            ObjectNode payload = crearPayload(chatId, text);
+    	if(!chatId.equals(CHAT_GRUPAL)) {
+    		ArrayNode teclado = addTeclado(payload);
+    		addBoton(teclado, "❌ Quitar este evento de tus alertas", "excluir" + "|" + odd.getIdOdd());
+    		addBoton(teclado, "Consultar Opciones 2WAY", "way" + "|" + odd.getIdOdd());
+    		addBotonesEntrar(teclado, odd);
+    	}
 
-            // el chat grupal no lleva botones
-            if(!chatId.equals("-1003064907759")) {
-            	ArrayNode teclado = addTeclado(payload);
-            	addBoton(teclado, "❌ Quitar este evento de tus alertas", callBackData);
-            	addBoton(teclado, "Consultar Opciones 2WAY", callBackData2WAY);
-            	for (Odd oddFusion : odd.getOddsFusion()) {
-            		addBoton(teclado, "Entrar " + AlertasFactory.getNombreBookie(oddFusion.getBookie()), "entrar" + "|" + oddFusion.getIdOdd());
-            	}
-            }
+    	enviar(Configuracion.BOT_TOKEN, payload);
+    }
 
-            String json = MAPPER.writeValueAsString(payload);
-
-            try (OutputStream os = conn.getOutputStream()) {
-                os.write(json.getBytes(StandardCharsets.UTF_8));
-            }
-
-            int responseCode = conn.getResponseCode();
-            if(responseCode==400) {
-            	response400Telegram++;	
-            }
-            System.out.println("📩 Telegram response: " + responseCode);
-
-            try (BufferedReader in = new BufferedReader(
-                    new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
-                String line;
-                StringBuilder response = new StringBuilder();
-                while ((line = in.readLine()) != null) {
-                    response.append(line);
-                }
-                System.out.println("📩 Respuesta Telegram: " + response);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-   
-}
-    
-    
     public static void sendTelegramMessageAlertaMover(String text , Odd odd, String chatId) {
-        
-        try {
-            String urlString = "https://api.telegram.org/bot" + Configuracion.BOT_TOKEN_MOVER + "/sendMessage";
-            URL url = new URL(urlString);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("POST");
-            conn.setDoOutput(true);
-            conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-         
-            
-           String json = MAPPER.writeValueAsString(crearPayload(chatId, text));
+    	enviar(Configuracion.BOT_TOKEN_MOVER, crearPayload(chatId, text));
+    }
 
-            try (OutputStream os = conn.getOutputStream()) {
-                os.write(json.getBytes(StandardCharsets.UTF_8));
-            }
-
-            int responseCode = conn.getResponseCode();
-            if(responseCode==400) {
-            	response400Telegram++;	
-            }
-            System.out.println("📩 Telegram response: " + responseCode);
-
-            try (BufferedReader in = new BufferedReader(
-                    new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
-                String line;
-                StringBuilder response = new StringBuilder();
-                while ((line = in.readLine()) != null) {
-                    response.append(line);
-                }
-                System.out.println("📩 Respuesta Telegram: " + response);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-   
-}
-    
     public static void sendTelegramMessageAlerta2WAY(String text , Odd odd, String chatId) {
-        
-        try {
-            String urlString = "https://api.telegram.org/bot" + Configuracion.BOT_TOKEN + "/sendMessage";
-            URL url = new URL(urlString);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("POST");
-            conn.setDoOutput(true);
-            conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-            
-            String json = MAPPER.writeValueAsString(crearPayload(chatId, text));
+    	enviar(Configuracion.BOT_TOKEN, crearPayload(chatId, text));
+    }
 
-            try (OutputStream os = conn.getOutputStream()) {
-                os.write(json.getBytes(StandardCharsets.UTF_8));
-            }
-
-            int responseCode = conn.getResponseCode();
-            if(responseCode==400) {
-            	response400Telegram++;	
-            }
-            System.out.println("📩 Telegram response: " + responseCode);
-
-            try (BufferedReader in = new BufferedReader(
-                    new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
-                String line;
-                StringBuilder response = new StringBuilder();
-                while ((line = in.readLine()) != null) {
-                    response.append(line);
-                }
-                System.out.println("📩 Respuesta Telegram: " + response);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-   
-}
-
-    
-    
     public static void sendTelegramMessageDebug(String text) {
-   	 for (String chatId : Configuracion.CHAT_IDS_DEBUG) {
-       try {
-           String urlString = "https://api.telegram.org/bot" + Configuracion.BOT_TOKEN + "/sendMessage";
-           String urlParameters = "chat_id=" + chatId
-                   + "&text=" + URLEncoder.encode(text, "UTF-8")
-                   + "&parse_mode=HTML"; // HTML limitado
+    	for (String chatId : Configuracion.CHAT_IDS_DEBUG) {
+    		enviar(Configuracion.BOT_TOKEN, crearPayload(chatId, text));
+    	}
+    }
 
-           byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-
-           URL url = new URL(urlString);
-           HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-           conn.setRequestMethod("POST");
-           conn.setDoOutput(true);
-
-           try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream())) {
-               wr.write(postData);
-           }
-
-           int responseCode = conn.getResponseCode();
-           if(responseCode==400) {
-           	response400Telegram++;	
-           }
-           System.out.println("📩 Telegram response: " + responseCode);
-
-           try (BufferedReader in = new BufferedReader(
-                   new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
-               String line;
-               StringBuilder response = new StringBuilder();
-               while ((line = in.readLine()) != null) {
-                   response.append(line);
-               }
-               System.out.println("📩 Respuesta Telegram: " + response);
-           }
-
-       } catch (Exception e) {
-           e.printStackTrace();
-       }
-   	 }
-   }
-    
-    
     public static void sendTelegramMessageConMenuOpciones(String text, String chatId , List<MenuOpcion> opciones) {
-        
-        try {
-            String urlString = "https://api.telegram.org/bot" + Configuracion.BOT_TOKEN + "/sendMessage";
-            URL url = new URL(urlString);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("POST");
-            conn.setDoOutput(true);
-            conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-            
-        
-			ObjectNode payload = crearPayload(chatId, text);
-			ArrayNode teclado = addTeclado(payload);
-			for (MenuOpcion menuOpcion : opciones) {
-				addBoton(teclado, menuOpcion.getTexto(), menuOpcion.getCallback());
-			}
-			String json = MAPPER.writeValueAsString(payload);
+    	ObjectNode payload = crearPayload(chatId, text);
+    	ArrayNode teclado = addTeclado(payload);
+    	for (MenuOpcion menuOpcion : opciones) {
+    		addBoton(teclado, menuOpcion.getTexto(), menuOpcion.getCallback());
+    	}
+    	enviar(Configuracion.BOT_TOKEN, payload);
+    }
 
-            try (OutputStream os = conn.getOutputStream()) {
-                os.write(json.getBytes(StandardCharsets.UTF_8));
-            }
-
-            int responseCode = conn.getResponseCode();
-            if(responseCode==400) {
-            	response400Telegram++;	
-            }
-            System.out.println("📩 Telegram response: " + responseCode);
-
-            try (BufferedReader in = new BufferedReader(
-                    new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
-                String line;
-                StringBuilder response = new StringBuilder();
-                while ((line = in.readLine()) != null) {
-                    response.append(line);
-                }
-                System.out.println("📩 Respuesta Telegram: " + response);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-   
-}
-    
-    
-    
     public static void sendTelegramMessageVigilante() {
-    	
-    	 StringBuilder mensajeDebug = new StringBuilder();
-         mensajeDebug.append("<b>Debug Ejecucion</b>\n");
-         mensajeDebug.append("Peticiones HTTP403:  <b>").append("1").append("</b>\n");
-         mensajeDebug.append("<b>Probable caída de la VPN. Avisar").append("</b>\n");
-         String text=mensajeDebug.toString();
-         
-      	 for (String chatId : Configuracion.CHAT_IDS_VIGILANTE) {
-          try {
-              String urlString = "https://api.telegram.org/bot" + Configuracion.BOT_TOKEN + "/sendMessage";
-              String urlParameters = "chat_id=" + chatId
-                      + "&text=" + URLEncoder.encode(text, "UTF-8")
-                      + "&parse_mode=HTML"; // HTML limitado
+    	StringBuilder mensajeDebug = new StringBuilder();
+    	mensajeDebug.append("<b>Debug Ejecucion</b>\n");
+    	mensajeDebug.append("Peticiones HTTP403:  <b>").append("1").append("</b>\n");
+    	mensajeDebug.append("<b>Probable caída de la VPN. Avisar").append("</b>\n");
+    	String text=mensajeDebug.toString();
 
-              byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
+    	for (String chatId : Configuracion.CHAT_IDS_VIGILANTE) {
+    		enviar(Configuracion.BOT_TOKEN, crearPayload(chatId, text));
+    	}
+    }
 
-              URL url = new URL(urlString);
-              HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-              conn.setRequestMethod("POST");
-              conn.setDoOutput(true);
-
-              try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream())) {
-                  wr.write(postData);
-              }
-
-              int responseCode = conn.getResponseCode();
-              if(responseCode==400) {
-              	response400Telegram++;	
-              }
-              System.out.println("📩 Telegram response: " + responseCode);
-
-              try (BufferedReader in = new BufferedReader(
-                      new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
-                  String line;
-                  StringBuilder response = new StringBuilder();
-                  while ((line = in.readLine()) != null) {
-                      response.append(line);
-                  }
-                  System.out.println("📩 Respuesta Telegram: " + response);
-              }
-
-          } catch (Exception e) {
-              e.printStackTrace();
-          }
-      	 }
-      }
-    
 }

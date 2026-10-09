@@ -10,6 +10,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import conf.Configuracion;
 import dto.MenuOpcion;
 import dto.Odd;
@@ -30,6 +34,32 @@ public class TelegramSender {
     public static Integer conteo=0;
     public static Integer conteoFiltrado=0;
     public static Double ratioMin=100.0;
+
+    // ============================================================
+    // Construcción del JSON para la API de Telegram con Jackson
+    // (escapa correctamente comillas, saltos de línea, \, etc.)
+    // ============================================================
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    private static ObjectNode crearPayload(String chatId, String text) {
+    	ObjectNode payload = MAPPER.createObjectNode();
+    	payload.put("chat_id", chatId);
+    	payload.put("text", text);
+    	payload.put("parse_mode", "HTML");
+    	payload.put("disable_web_page_preview", true);
+    	return payload;
+    }
+
+    private static ArrayNode addTeclado(ObjectNode payload) {
+    	return payload.putObject("reply_markup").putArray("inline_keyboard");
+    }
+
+    // añade una fila con un único botón
+    private static void addBoton(ArrayNode teclado, String texto, String callback) {
+    	ObjectNode boton = teclado.addArray().addObject();
+    	boton.put("text", texto);
+    	boton.put("callback_data", callback);
+    }
     
     /*  ESTE METODO NO SE UTILIZA*/
     public static void sendTelegramMessage(String text) {
@@ -89,59 +119,26 @@ public class TelegramSender {
                 
                 String callBackData="excluir" + "|" + odd.getIdOdd() ;
                 String callBackData2WAY="way" + "|" + odd.getIdOdd() ;
-                
-                String botonesEntrar="";
-                String callBackEntrar="";
-                
-                for (Odd oddFusion : odd.getOddsFusion()) {
-                	callBackEntrar="entrar" + "|" + oddFusion.getIdOdd();
-					botonesEntrar+=",[{\"text\":\"Entrar "+ AlertasFactory.getNombreBookie(oddFusion.getBookie())  + "\",\"callback_data\":\""+ callBackEntrar +"\"}]";
-				}
 
-               String json="";
-                if(chatId.equals("-1003064907759")) {
-                	json = "{"
-                            + "\"chat_id\":\"" + chatId + "\","
-                            + "\"text\":\"" + text.replace("\"", "\\\"") + "\","
-                            + "\"parse_mode\":\"HTML\","
-                            + "\"disable_web_page_preview\":true"
-                            + "}";
-                	
-                } else {
-                	 if(ninja) {               	
-	                	 json = "{"
-	                             + "\"chat_id\":\"" + chatId + "\","
-	                             + "\"text\":\"" + text.replace("\"", "\\\"") + "\","
-	                             + "\"parse_mode\":\"HTML\","
-	                             + "\"disable_web_page_preview\":true,"
-	                             + "\"reply_markup\":{"
-	                             + "   \"inline_keyboard\":["
-	                             + "       [{\"text\":\"❌ Quitar este evento de tus alertas\",\"callback_data\":\""+ callBackData +"\"}],"
-	                             + "       [{\"text\":\"Consultar Opciones 2WAY\",\"callback_data\":\""+ callBackData2WAY +"\"}]"
-	                             + botonesEntrar
-	                             + "   ]"
-	                             + "}"
-	                             + "}";
-                	 }
-                	 
-                	 if(vili) {    
-                		 json = "{"
-	                             + "\"chat_id\":\"" + chatId + "\","
-	                             + "\"text\":\"" + text.replace("\"", "\\\"") + "\","
-	                             + "\"parse_mode\":\"HTML\","
-	                             + "\"disable_web_page_preview\":true,"
-	                             + "\"reply_markup\":{"
-	                             + "   \"inline_keyboard\":["
-	                             + "       [{\"text\":\"❌ Quitar este evento de tus alertas\",\"callback_data\":\""+ callBackData +"\"}]"
-	                                                          
-	                             + "   ]"
-	                             + "}"
-	                             + "}";
-                		 
-                	 }
-                	 
+                ObjectNode payload = crearPayload(chatId, text);
+
+                // el chat grupal no lleva botones
+                if(!chatId.equals("-1003064907759")) {
+                	if(ninja) {
+                		ArrayNode teclado = addTeclado(payload);
+                		addBoton(teclado, "❌ Quitar este evento de tus alertas", callBackData);
+                		addBoton(teclado, "Consultar Opciones 2WAY", callBackData2WAY);
+                		for (Odd oddFusion : odd.getOddsFusion()) {
+                			addBoton(teclado, "Entrar " + AlertasFactory.getNombreBookie(oddFusion.getBookie()), "entrar" + "|" + oddFusion.getIdOdd());
+                		}
+                	} else if(vili) {
+                		ArrayNode teclado = addTeclado(payload);
+                		addBoton(teclado, "❌ Quitar este evento de tus alertas", callBackData);
+                	}
                 }
-                
+
+                String json = MAPPER.writeValueAsString(payload);
+
                 System.out.println("📩 Telegram JSON: " + json);
 
                 try (OutputStream os = conn.getOutputStream()) {
@@ -182,41 +179,20 @@ public class TelegramSender {
             
             String callBackData="excluir" + "|" + odd.getIdOdd() ;
             String callBackData2WAY="way" + "|" + odd.getIdOdd() ;
-            
-            String botonesEntrar="";
-            String callBackEntrar="";
-            
-            for (Odd oddFusion : odd.getOddsFusion()) {
-            	callBackEntrar="entrar" + "|" + oddFusion.getIdOdd();
-				botonesEntrar+=",[{\"text\":\"Entrar "+ AlertasFactory.getNombreBookie(oddFusion.getBookie())  + "\",\"callback_data\":\""+ callBackEntrar +"\"}]";
-			}
 
-           String json="";
-            if(chatId.equals("-1003064907759")) {
-            	json = "{"
-                        + "\"chat_id\":\"" + chatId + "\","
-                        + "\"text\":\"" + text.replace("\"", "\\\"") + "\","
-                        + "\"parse_mode\":\"HTML\","
-                        + "\"disable_web_page_preview\":true"
-                        + "}";
-            	
-            } else {
-            	 json = "{"
-                         + "\"chat_id\":\"" + chatId + "\","
-                         + "\"text\":\"" + text.replace("\"", "\\\"") + "\","
-                         + "\"parse_mode\":\"HTML\","
-                         + "\"disable_web_page_preview\":true,"
-                         + "\"reply_markup\":{"
-                         + "   \"inline_keyboard\":["
-                         + "       [{\"text\":\"❌ Quitar este evento de tus alertas\",\"callback_data\":\""+ callBackData +"\"}],"
-                         + "       [{\"text\":\"Consultar Opciones 2WAY\",\"callback_data\":\""+ callBackData2WAY +"\"}]"
-                         + botonesEntrar
-                         + "   ]"
-                         + "}"
-                         + "}";
+            ObjectNode payload = crearPayload(chatId, text);
+
+            // el chat grupal no lleva botones
+            if(!chatId.equals("-1003064907759")) {
+            	ArrayNode teclado = addTeclado(payload);
+            	addBoton(teclado, "❌ Quitar este evento de tus alertas", callBackData);
+            	addBoton(teclado, "Consultar Opciones 2WAY", callBackData2WAY);
+            	for (Odd oddFusion : odd.getOddsFusion()) {
+            		addBoton(teclado, "Entrar " + AlertasFactory.getNombreBookie(oddFusion.getBookie()), "entrar" + "|" + oddFusion.getIdOdd());
+            	}
             }
-            
-           
+
+            String json = MAPPER.writeValueAsString(payload);
 
             try (OutputStream os = conn.getOutputStream()) {
                 os.write(json.getBytes(StandardCharsets.UTF_8));
@@ -256,12 +232,7 @@ public class TelegramSender {
             conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
          
             
-           String json = "{"
-                    + "\"chat_id\":\"" + chatId + "\","
-                    + "\"text\":\"" + text.replace("\"", "\\\"") + "\","
-                    + "\"parse_mode\":\"HTML\","
-                    + "\"disable_web_page_preview\":true"
-                    + "}";
+           String json = MAPPER.writeValueAsString(crearPayload(chatId, text));
 
             try (OutputStream os = conn.getOutputStream()) {
                 os.write(json.getBytes(StandardCharsets.UTF_8));
@@ -299,19 +270,7 @@ public class TelegramSender {
             conn.setDoOutput(true);
             conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
             
-            String callBackData="excluir" + "|" + odd.getIdOdd() ;
-            String callBackData2WAY="way" + "|" + odd.getIdOdd() ;
-
-           String json="";
-           
-            	json = "{"
-                        + "\"chat_id\":\"" + chatId + "\","
-                        + "\"text\":\"" + text.replace("\"", "\\\"") + "\","
-                        + "\"parse_mode\":\"HTML\","
-                        + "\"disable_web_page_preview\":true"
-                        + "}";
-            	
-           
+            String json = MAPPER.writeValueAsString(crearPayload(chatId, text));
 
             try (OutputStream os = conn.getOutputStream()) {
                 os.write(json.getBytes(StandardCharsets.UTF_8));
@@ -394,24 +353,12 @@ public class TelegramSender {
             conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
             
         
-			String json = "{";
-			json += "\"chat_id\":\"" + chatId + "\",";
-			json += "\"text\":\"" + text.replace("\"", "\\\"") + "\",";
-			json += "\"parse_mode\":\"HTML\",";
-			json += "\"disable_web_page_preview\":true,";
-			json += "\"reply_markup\":{";
-			json += "   \"inline_keyboard\":[";
-			
+			ObjectNode payload = crearPayload(chatId, text);
+			ArrayNode teclado = addTeclado(payload);
 			for (MenuOpcion menuOpcion : opciones) {
-				json += "       [{\"text\":\""+ menuOpcion.getTexto() +"\",\"callback_data\":\"" + menuOpcion.getCallback() + "\"}],";
+				addBoton(teclado, menuOpcion.getTexto(), menuOpcion.getCallback());
 			}
-			json = json.substring(0, json.length() - 1);
-			json += "   ]";
-			json += "}";
-			json += "}";
-           
-            
-           
+			String json = MAPPER.writeValueAsString(payload);
 
             try (OutputStream os = conn.getOutputStream()) {
                 os.write(json.getBytes(StandardCharsets.UTF_8));

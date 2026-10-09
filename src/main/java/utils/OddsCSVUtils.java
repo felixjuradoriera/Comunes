@@ -62,10 +62,17 @@ public class OddsCSVUtils {
         try (BufferedReader br = new BufferedReader(new FileReader(f))) {
             String line;
             while ((line = br.readLine()) != null) {
+            	try {
             	Odd o = new Odd();
                 String[] campos = line.split(";");
+
+                // mínimo: hasta fechaPartido (campos[12]); Scrap y TelBot la necesitan
+                if (campos.length < 13) {
+                	System.out.println("Línea CSV descartada (campos insuficientes) en " + file + ": " + line);
+                	continue;
+                }
                
-                if (campos.length >= 10) {
+                if (campos.length >= 11) {
                    
                     o.setEvent(campos[0]);
                     o.setBookie(campos[1]);
@@ -81,10 +88,10 @@ public class OddsCSVUtils {
                     o.setFechaAlerta(fecha);
                    
                 }
-                if (campos.length >= 11) {
+                if (campos.length >= 12) {
                 	o.setIdOdd(Long.valueOf(campos[11]));
                 }
-                if (campos.length >= 12) {
+                if (campos.length >= 13) {
                 	o.setsFechaPartido(campos[12]);
                 	DateTimeFormatter formatterSalida = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
                 	
@@ -157,6 +164,9 @@ public class OddsCSVUtils {
                 }
                 
                 lista.add(o);
+            	} catch (RuntimeException ex) {
+            		System.out.println("Línea CSV descartada (formato incorrecto) en " + file + ": " + line + " -> " + ex);
+            	}
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -172,7 +182,7 @@ public class OddsCSVUtils {
     		try {
     			ArrayList<Odd> oddsAnterioresHist = OddsCSVUtils.leerCSV(Configuracion.CSV_FILE_HIST);
     			for (Odd odd : oddsAnterioresHist) {
-    				if(odd.getIdOdd().longValue()==idOdd.longValue()) {
+    				if(odd.getIdOdd()!=null && odd.getIdOdd().longValue()==idOdd.longValue()) {
     					return odd;
     				}
     			}

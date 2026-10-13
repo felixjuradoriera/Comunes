@@ -28,6 +28,9 @@ import okhttp3.Response;
 import telegram.TelegramSender;
 
 public class ViliBetsService {
+
+	// true si la última petición HTTP a Vilibets fue correcta (200 con body)
+	public static boolean ultimaPeticionOk = false;
 	
 	
 
@@ -202,6 +205,7 @@ public class ViliBetsService {
 	 
 	 public static String crearPeticionData(String urlParameters, String urlConexion) {
 	    	StringBuilder response = new StringBuilder();
+	    	ultimaPeticionOk = false;
 	    	
 	    	
 	    	if (urlConexion == null || urlConexion.isBlank()) {
@@ -232,7 +236,7 @@ public class ViliBetsService {
 	                if(response1.code()>200) {
 	                	System.out.println(responseBody);
 	                }
-	            	
+	                ultimaPeticionOk = (response1.code() == 200);
 	                return responseBody;
 	                
 	            }

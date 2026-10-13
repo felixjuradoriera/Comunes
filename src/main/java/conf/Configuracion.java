@@ -58,6 +58,16 @@ public class Configuracion {
 	// Token de sesión de Ninjabet (cabecera X-Session-Token)
 	public static final String NINJA_SESSION_TOKEN = secret("NINJA_SESSION_TOKEN");
 
+	// ===== HealthChecks.io (SCRAP). Vacío = desactivado =====
+	public static final String HEALTHCHECK_START      = secret("HEALTHCHECK_START");
+	public static final String HEALTHCHECK_SUCCESS    = secret("HEALTHCHECK_SUCCESS");
+	public static final String HEALTHCHECK_NINJA_FAIL = secret("HEALTHCHECK_NINJA_FAIL");
+	public static final String HEALTHCHECK_VILI_FAIL  = secret("HEALTHCHECK_VILI_FAIL");
+	public static final String HEALTHCHECK_NINJA_OK   = secret("HEALTHCHECK_NINJA_OK");
+	public static final String HEALTHCHECK_VILI_OK    = secret("HEALTHCHECK_VILI_OK");
+	public static final String HEALTHCHECK_TELBOT_OK   = secret("HEALTHCHECK_TELBOT_OK");
+	public static final String HEALTHCHECK_TELBOT_FAIL = secret("HEALTHCHECK_TELBOT_FAIL");
+
 	// ===== Token de sesión vigente de Ninjabet (se auto-renueva desde la respuesta) =====
 	private static final String NINJA_TOKEN_FILE = BASE_DIR + File.separator + "ninja_session.token";
 	private static String ninjaSessionTokenActual = NINJA_SESSION_TOKEN;

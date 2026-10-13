@@ -62,7 +62,7 @@ public class AlertasFactory {
 						 
 						 mensaje.append("    🏛 <b>").append(getNombreBookie(odFusion.getBookie())).append("</b>\n");
 						 
-						 if (odFusion.getBookie().equals("39") || odFusion.getBookie().equals("20")|| odFusion.getBookie().equals("57")|| odFusion.getBookie().equals("104")) {
+						 if (odFusion.getBookie().equals("37") || odFusion.getBookie().equals("107")|| odFusion.getBookie().equals("145")|| odFusion.getBookie().equals("43")) {
 							 mensaje.append("    📈 <b>").append(odFusion.getRating()).append("%</b> (").append(odFusion.getRatingOriginal()).append(")\n");
 						 } else {
 							 mensaje.append("    📈 <b>").append(odFusion.getRating()).append("%</b>\n");
@@ -70,7 +70,7 @@ public class AlertasFactory {
 						             		
 						 mensaje.append("    Ap: <b>").append(odFusion.getSelection()).append("</b>\n");
 						 
-						 if (odFusion.getBookie().equals("39") || odFusion.getBookie().equals("20")|| odFusion.getBookie().equals("57")|| odFusion.getBookie().equals("104")) {
+						 if (odFusion.getBookie().equals("37") || odFusion.getBookie().equals("107")|| odFusion.getBookie().equals("145")|| odFusion.getBookie().equals("43")) {
 							 mensaje.append("    📋 Back: <b>").append(odFusion.getBackOdd()).append("</b> (").append(odFusion.getBackOddOriginal()).append(") | Lay: <b>").append(odFusion.getLayOdd()).append("</b>\n");	 
 						 } else {
 							 mensaje.append("    📋 Back: <b>").append(odFusion.getBackOdd()).append("</b> | Lay: <b>").append(odFusion.getLayOdd()).append("</b>\n"); 
@@ -106,7 +106,7 @@ public class AlertasFactory {
 				{
 					mensaje.append("🟢<b>").append(odd.getEquipoHome()).append("</b>\n");
 					for (Odd o : odd.getMejoresHome()) {
-						 if (o.getBookie().equals("39") || o.getBookie().equals("20")|| o.getBookie().equals("57")|| o.getBookie().equals("104")) {
+						 if (o.getBookie().equals("37") || o.getBookie().equals("107")|| o.getBookie().equals("145")|| o.getBookie().equals("43")) {
 							mensaje.append("     ").append(getNombreBookie(o.getBookie())).append("->").append(o.getBackOdd()).append("(").append(o.getBackOddOriginal()).append(")").append("\n");	 
 						 } else {
 							mensaje.append("     ").append(getNombreBookie(o.getBookie())).append("->").append(o.getBackOdd()).append("\n"); 
@@ -118,7 +118,7 @@ public class AlertasFactory {
 				{
 					mensaje.append("🟢<b>").append(odd.getEquipoAway()).append("</b>\n");
 					for (Odd o : odd.getMejoresAway()) {
-						if (o.getBookie().equals("39") || o.getBookie().equals("20")|| o.getBookie().equals("57")|| o.getBookie().equals("104")) {
+						if (o.getBookie().equals("37") || o.getBookie().equals("107")|| o.getBookie().equals("145")|| o.getBookie().equals("43")) {
 							mensaje.append("     ").append(getNombreBookie(o.getBookie())).append("->").append(o.getBackOdd()).append("(").append(o.getBackOddOriginal()).append(")").append("\n");	
 						} else {
 							mensaje.append("     ").append(getNombreBookie(o.getBookie())).append("->").append(o.getBackOdd()).append("\n");
@@ -263,7 +263,7 @@ public static StringBuilder createFichaCierreParcial(Odd odd) {
 		mensaje.append("🔔<u><b> 2WAY 2UP </b></u>\n");
 		mensaje.append("🟢<b>").append(odd.getEquipoHome()).append("</b>\n");
 		for (Odd o : odd.getMejoresHome()) {
-			 if (o.getBookie().equals("39") || o.getBookie().equals("20") || o.getBookie().equals("57")|| o.getBookie().equals("104")) {
+			 if (o.getBookie().equals("37") || o.getBookie().equals("107") || o.getBookie().equals("145")|| o.getBookie().equals("43")) {
 				mensaje.append("     ").append(getNombreBookie(o.getBookie())).append("->").append(o.getBackOdd()).append("(").append(o.getBackOddOriginal()).append(")").append("\n");	 
 			 } else {
 				mensaje.append("     ").append(getNombreBookie(o.getBookie())).append("->").append(o.getBackOdd()).append("\n"); 
@@ -273,7 +273,7 @@ public static StringBuilder createFichaCierreParcial(Odd odd) {
 		
 		mensaje.append("🟢<b>").append("Empate").append("</b>\n");
 		for (Odd o : odd.getMejoresDraw()) {
-			if (o.getBookie().equals("39") || o.getBookie().equals("2") || o.getBookie().equals("20")|| o.getBookie().equals("57")|| o.getBookie().equals("104")) {
+			if (o.getBookie().equals("37") || o.getBookie().equals("3") || o.getBookie().equals("107")|| o.getBookie().equals("145")|| o.getBookie().equals("43")) {
 				mensaje.append("     ").append(getNombreBookie(o.getBookie())).append("->").append(o.getBackOdd()).append("(").append(o.getBackOddOriginal()).append(")").append("\n");	
 			} else {
 				mensaje.append("     ").append(getNombreBookie(o.getBookie())).append("->").append(o.getBackOdd()).append("\n");
@@ -288,7 +288,7 @@ public static StringBuilder createFichaCierreParcial(Odd odd) {
 		
 		mensaje.append("🟢<b>").append(odd.getEquipoAway()).append("</b>\n");
 		for (Odd o : odd.getMejoresAway()) {
-			if (o.getBookie().equals("39") || o.getBookie().equals("20")|| o.getBookie().equals("57")|| o.getBookie().equals("104")) {
+			if (o.getBookie().equals("37") || o.getBookie().equals("107")|| o.getBookie().equals("145")|| o.getBookie().equals("43")) {
 				mensaje.append("     ").append(getNombreBookie(o.getBookie())).append("->").append(o.getBackOdd()).append("(").append(o.getBackOddOriginal()).append(")").append("\n");	
 			} else {
 				mensaje.append("     ").append(getNombreBookie(o.getBookie())).append("->").append(o.getBackOdd()).append("\n");
@@ -305,48 +305,43 @@ public static StringBuilder createFichaCierreParcial(Odd odd) {
 	
     public static String getNombreBookie(String bookie) {
         Map<String, String> bookies = new HashMap<>();
-        bookies.put("68", "1xbet");
-        bookies.put("1", "888sport");
-        bookies.put("54", "Admiral");
-        bookies.put("108", "Aupabet");
-        bookies.put("2", "Bet365");
-        bookies.put("75", "Bet777");
-        bookies.put("53", "Betfairsportbook");
-        bookies.put("56", "Betsson");
-        bookies.put("59", "Betway");
-        bookies.put("7", "Bwin");
-        bookies.put("62", "Casino Barcelona");
-        bookies.put("61", "Casino Madrid");
-        bookies.put("41", "Casinogranvía");
-        bookies.put("106", "Casumo");
-        bookies.put("39", "Codere");
-        bookies.put("78", "Dafabet");
-        bookies.put("104", "Daznbet");
-        bookies.put("102", "Ebingo");
-        bookies.put("103", "Efbet");
-        bookies.put("73", "Enracha");
-        bookies.put("40", "Goldenpark");
-        bookies.put("43", "Interwetten");
-        bookies.put("42", "Jokerbet");
-        bookies.put("76", "Juegging");
-        bookies.put("64", "Kirolbet");
-        bookies.put("71", "Leovegas");
-        bookies.put("44", "Luckia");
-        bookies.put("55", "Marathonbet");
-        bookies.put("45", "MarcaApuestas");
-        bookies.put("107", "Olybet");
-        bookies.put("46", "Paf");
-        bookies.put("47", "Paston");
-        bookies.put("29", "Pokerstars");
-        bookies.put("57", "Retabet");
-        bookies.put("109", "Solcasino");
-        bookies.put("48", "Sportium");
-        bookies.put("105", "Tonybet");
-        bookies.put("65", "Versus");
-        bookies.put("20", "Williamhill");
-        bookies.put("69", "Winamax");
-        bookies.put("52", "Yaass");
-        bookies.put("74", "Zebet");
+        bookies.put("73", "1xbet");
+        bookies.put("87", "888sport");
+        bookies.put("2", "Admiral");
+        bookies.put("147", "Aupabet");
+        bookies.put("3", "Bet365");
+        bookies.put("5", "Bet777");
+        bookies.put("12", "Betfairsportbook");
+        bookies.put("95", "Betsson");
+        bookies.put("20", "Betway");
+        bookies.put("27", "Bwin");
+        bookies.put("146", "Casino Barcelona");
+        bookies.put("170", "Casino Madrid");
+        bookies.put("30", "Casinogranvía");
+        bookies.put("24", "Casumo");
+        bookies.put("37", "Codere");
+        bookies.put("41", "Dafabet");
+        bookies.put("43", "Daznbet");
+        bookies.put("204", "Enracha");
+        bookies.put("143", "Goldenpark");
+        bookies.put("49", "Interwetten");
+        bookies.put("50", "Jokerbet");
+        bookies.put("147", "Kirolbet");
+        bookies.put("151", "Leovegas");
+        bookies.put("63", "Luckia");
+        bookies.put("144", "MarcaApuestas");
+        bookies.put("72", "Olybet");
+        bookies.put("74", "Paston");
+        bookies.put("76", "Pokerstars");
+        bookies.put("145", "Retabet");
+        bookies.put("85", "Solcasino");
+        bookies.put("90", "Sportium");
+        bookies.put("100", "Tonybet");
+        bookies.put("104", "Versus");
+        bookies.put("107", "Williamhill");
+        bookies.put("109", "Winamax");
+        bookies.put("105", "Yaass");
+        bookies.put("119", "Zebet");
 
         return bookies.getOrDefault(bookie, bookie);
     }

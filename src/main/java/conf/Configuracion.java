@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Arrays;
 import java.util.Properties;
 
@@ -57,6 +58,42 @@ public class Configuracion {
 	// Token de sesión de Ninjabet (cabecera X-Session-Token)
 	public static final String NINJA_SESSION_TOKEN = secret("NINJA_SESSION_TOKEN");
 
+	// ===== Token de sesión vigente de Ninjabet (se auto-renueva desde la respuesta) =====
+	private static final String NINJA_TOKEN_FILE = BASE_DIR + File.separator + "ninja_session.token";
+	private static String ninjaSessionTokenActual = NINJA_SESSION_TOKEN;
+	static {
+		// Si hay un token auto-renovado persistido y procede del mismo token de bot.properties, lo usamos.
+		// Si el usuario cambió bot.properties (renovación manual), prevalece bot.properties.
+		if (NINJA_SESSION_TOKEN != null) {
+			try {
+				java.io.File tf = new java.io.File(NINJA_TOKEN_FILE);
+				if (tf.exists()) {
+					java.util.List<String> ls = java.nio.file.Files.readAllLines(tf.toPath());
+					if (ls.size() >= 2 && NINJA_SESSION_TOKEN.equals(ls.get(0).trim())) {
+						String cur = ls.get(1).trim();
+						if (!cur.isEmpty()) ninjaSessionTokenActual = cur;
+					}
+				}
+			} catch (Exception e) { /* usamos el de bot.properties */ }
+		}
+	}
+	public static synchronized String getNinjaSessionToken() {
+		return ninjaSessionTokenActual;
+	}
+	public static synchronized void actualizarNinjaSessionToken(String nuevo) {
+		if (nuevo == null) return;
+		nuevo = nuevo.trim();
+		if (nuevo.isEmpty() || nuevo.equals(ninjaSessionTokenActual)) return;
+		ninjaSessionTokenActual = nuevo;
+		System.out.println("🔄 Token de sesión Ninjabet renovado desde la respuesta");
+		if (NINJA_SESSION_TOKEN != null) {
+			try {
+				java.nio.file.Files.write(new java.io.File(NINJA_TOKEN_FILE).toPath(),
+					(NINJA_SESSION_TOKEN + System.lineSeparator() + nuevo).getBytes(java.nio.charset.StandardCharsets.UTF_8));
+			} catch (Exception e) { /* persistencia best-effort */ }
+		}
+	}
+
 	// Devuelve el valor de bot.properties sin espacios, o null si no está o está vacío
 	private static String secret(String clave) {
 		String valor = secrets.getProperty(clave);
@@ -88,6 +125,23 @@ public class Configuracion {
 
 	
 	public static String urlData = "https://api.ninjabet.bet/api/v1/odds/oddsmatcher";
+
+	// ===== Servicio nuevo Ninjabet (oddsmatcher) =====
+	public static Integer ninjaPagesize = 10;
+	public static Integer ninjaMaxPaginas = 7;          // tope de páginas por ejecución (orden por rating desc)
+	public static Integer ninjaPagesizeEvento = 50;     // cuotas por evento (2WAY / dame_alertas)
+	public static Integer ninjaMaxPaginasEvento = 5;
+	public static Integer ninjaBetAmount = 100;
+	public static String  ninjaMatcherType = "oddsmatcher";
+	public static String  ninjaMode = "realmoney";
+	public static String  ninjaOrderBy = "rating";
+	public static List<Integer> ninjaExchangeIds = Arrays.asList(10);      // 10 = Betfair Exchange
+	public static List<Integer> ninjaSport = Arrays.asList(1);             // 1 = fútbol
+	public static List<Integer> ninjaSelecciones = Arrays.asList(1, 2);    // 1=local, 2=visitante (3=empate)
+	// casas back para filtrar (alertas normales y 2WAY) -> Bet365, Sportium, Bwin, Winamax, MarcaApuestas, WilliamHill, Retabet, Daznbet
+	public static List<Integer> ninjaProvider1 = Arrays.asList(3, 90, 27, 109, 144, 107, 145, 43);
+	// lista completa de casas disponibles (pids del payload) -> REVISAR
+	public static List<Integer> ninjaPids = Arrays.asList(73,87,2,147,3,5,10,12,95,20,24,27,146,30,24,37,41,43,30,204,143,170,49,50,147,147,151,63,144,24,72,24,74,76,145,85,90,100,104,107,109,105,204,119);
 	public static String urlEvents = "https://api.ninjabet.bet/api/v1/odds/search-data";
 	public static String urlExchange = "https://ero.betfair.es/www/sports/exchange/readonly/v1/bymarket";
 	

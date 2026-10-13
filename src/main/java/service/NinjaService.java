@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -21,9 +20,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import conf.Configuracion;
 import dto.Event;
+import dto.NinjaRoot;
 import dto.Odd;
 import exchange.PriceSize;
 import exchange.Runner;
@@ -215,6 +217,198 @@ public class NinjaService {
 	    }
 	 
 	 
+	// ============================================================
+	// SERVICIO NUEVO (oddsmatcher): petición paginada + mapeo a Odd
+	// Devuelve el mismo ArrayList<Odd> (tipoOdd "N") que el flujo antiguo.
+	// ============================================================
+	public static String crearPeticionOddsmatcher(int offset) {
+		StringBuilder response = new StringBuilder();
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			ObjectNode payload = mapper.createObjectNode();
+			payload.put("bet_amount", Configuracion.ninjaBetAmount);
+			ArrayNode ex = payload.putArray("exchange_ids");
+			for (Integer id : Configuracion.ninjaExchangeIds) ex.add(id);
+			payload.put("matcher_type", Configuracion.ninjaMatcherType);
+			payload.put("mode", Configuracion.ninjaMode);
+			payload.put("order_by", Configuracion.ninjaOrderBy);
+			payload.put("offset", offset);
+			payload.put("pagesize", Configuracion.ninjaPagesize);
+			ArrayNode pids = payload.putArray("pids");
+			for (Integer id : Configuracion.ninjaPids) pids.add(id);
+			ArrayNode prov = payload.putArray("provider1");
+			for (Integer id : Configuracion.ninjaProvider1) prov.add(id);
+			payload.put("rating_from", Integer.valueOf(Configuracion.ratingInicial));
+			ArrayNode sport = payload.putArray("sport");
+			for (Integer id : Configuracion.ninjaSport) sport.add(id);
+			// filtro de mercado (1=local,2=visitante,3=empate). El servidor puede ignorarlo;
+			// de todas formas se vuelve a filtrar en cliente al mapear.
+			if (Configuracion.ninjaSelecciones != null && !Configuracion.ninjaSelecciones.isEmpty()) {
+				ArrayNode sel = payload.putArray("selection1");
+				for (Integer sv : Configuracion.ninjaSelecciones) sel.add(sv);
+			}
+			byte[] postData = mapper.writeValueAsBytes(payload);
+
+			URL obj = new URL(Configuracion.urlData);
+			HttpURLConnection conn = (HttpURLConnection) obj.openConnection();
+			conn.setRequestMethod("POST");
+			conn.setRequestProperty("Content-Type", "application/json");
+			conn.setRequestProperty("Accept", "*/*");
+			conn.setRequestProperty("Origin", "https://ninjabet.es");
+			conn.setRequestProperty("Referer", "https://ninjabet.es/");
+			conn.setRequestProperty("X-Requested-With", "XMLHttpRequest");
+			conn.setRequestProperty("User-Agent",
+				"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36");
+			if (Configuracion.getNinjaSessionToken() != null) {
+				conn.setRequestProperty("X-Session-Token", Configuracion.getNinjaSessionToken());
+			} else {
+				System.out.println("❌ Falta NINJA_SESSION_TOKEN en bot.properties: la petición a Ninjabet fallará");
+			}
+			conn.setDoOutput(true);
+			try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream())) {
+				wr.write(postData);
+			}
+
+			int responseCode = conn.getResponseCode();
+			codeRespuesta = responseCode;
+			Configuracion.actualizarNinjaSessionToken(conn.getHeaderField("x-session-token"));
+			System.out.println("Response Code Ninjabet: " + responseCode);
+			InputStream is = (responseCode >= 200 && responseCode < 300) ? conn.getInputStream() : conn.getErrorStream();
+			if (is != null) {
+				try (BufferedReader in = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+					String line;
+					while ((line = in.readLine()) != null) response.append(line);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			codeRespuesta = -1;
+		}
+		return response.toString();
+	}
+
+	public static ArrayList<Odd> leerOddsNinja() {
+		ArrayList<Odd> lectura = new ArrayList<Odd>();
+		ObjectMapper mapper = new ObjectMapper();
+		int offset = 0;
+		boolean inicial = true;
+
+		while (offset < Configuracion.ninjaMaxPaginas) {
+			String response = crearPeticionOddsmatcher(offset);
+
+			if (codeRespuesta == null || codeRespuesta.intValue() != 200) {
+				TelegramSender.response403++;
+				TelegramSender.sendTelegramMessageVigilante(codeRespuesta);
+				return null;
+			}
+			if (inicial) { TelegramSender.response200_Inicial++; inicial = false; }
+			else { TelegramSender.response200_Adicional++; }
+
+			if (offset == 0) DatosPruebasUtils.guardarJsonEnArchivo(new StringBuilder(response));
+
+			NinjaRoot root;
+			try {
+				root = mapper.readValue(response, NinjaRoot.class);
+			} catch (Exception e) {
+				e.printStackTrace();
+				break;
+			}
+			if (root == null || root.evs == null || root.evs.isEmpty()) break;
+
+			// mapa id_evento -> datos del partido
+			java.util.HashMap<Long, NinjaRoot.NinjaMd> partidos = new java.util.HashMap<>();
+			if (root.md != null) {
+				for (NinjaRoot.NinjaMd m : root.md) {
+					if (m.e1 != null) for (Long eid : m.e1) partidos.put(eid, m);
+				}
+			}
+
+			for (NinjaRoot.NinjaEv ev : root.evs) {
+				// filtro de mercado (local/visitante) en cliente
+				if (ev.s1 == null || !Configuracion.ninjaSelecciones.contains(ev.s1)) continue;
+				// filtro de cuota mínima en cliente (el servidor nuevo no filtra por cuota)
+				if (ev.o1 == null || ev.o1 < Configuracion.nCuotaMinima) continue;
+				// sin datos de partido no se puede construir una alerta usable
+				NinjaRoot.NinjaMd m = (ev.e1 != null) ? partidos.get(ev.e1) : null;
+				if (m == null) continue;
+
+				Odd odd = new Odd();
+				odd.setTipoOdd("N");
+				odd.setBookie(String.valueOf(ev.p1));
+				odd.setRating(String.valueOf(ev.rt1));
+				odd.setRatingOriginal(String.valueOf(ev.rt1));
+				odd.setBackOdd(String.valueOf(ev.o1));
+				odd.setBackOddOriginal(String.valueOf(ev.o1));
+				odd.setLayOdd(ev.o2 != null ? String.valueOf(ev.o2) : "0");
+				odd.setSelectionId(String.valueOf(ev.s1));
+				odd.setMarket_id(ev.mk);
+				odd.setEvent(m.ev);
+				odd.setCompetition(m.cm);
+				odd.setCountry(m.ct);
+
+				// selección textual a partir del evento "A v B"
+				String sel = String.valueOf(ev.s1);
+				if (m.ev != null && m.ev.contains(" v ")) {
+					String[] parts = m.ev.split(" v ");
+					if (ev.s1 == 1) sel = parts[0].trim();
+					else if (ev.s1 == 2 && parts.length > 1) sel = parts[1].trim();
+					else if (ev.s1 == 3) sel = "empate";
+				}
+				odd.setSelection(sel);
+
+				// fecha del partido
+				try {
+					LocalDateTime fecha = LocalDateTime.parse(m.st);
+					odd.setFechaPartido(fecha);
+					odd.setsFechaPartido(fecha.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+				} catch (Exception e) {
+					continue; // sin fecha válida, descartamos (los filtros posteriores la necesitan)
+				}
+
+				// edad en minutos a partir de ut (ahora es un timestamp absoluto)
+				odd.setUpdate_time(ev.ut);
+				int edad = 0;
+				if (ev.ut != null) {
+					try {
+						edad = (int) java.time.Duration.between(java.time.Instant.parse(ev.ut), java.time.Instant.now()).toMinutes();
+					} catch (Exception e) { edad = 0; }
+				}
+				if (edad < 0) edad = 0;
+				odd.setTimeInMin(edad);
+
+				// rebaja de cuota/rating para Codere, William Hill, Retabet, Daznbet
+				odd = OddUtils.ajustaCuotaRating(odd);
+
+				// nivel de alerta (misma lógica que el servicio antiguo)
+				try {
+					Double cuota = Double.valueOf(odd.getBackOdd());
+					Double rating = Double.valueOf(odd.getRating());
+					Integer nivelAlerta = 0;
+					if (cuota > 5) {
+						if (rating > 93.5) nivelAlerta = 1;
+						if (rating > 95) nivelAlerta = 2;
+					} else {
+						if (rating > 96.25) nivelAlerta = 1;
+						if (rating > 97.5) nivelAlerta = 2;
+					}
+					odd.setNivelAlerta(nivelAlerta);
+				} catch (Exception e) {
+					odd.setNivelAlerta(0);
+				}
+
+				lectura.add(odd);
+			}
+
+			// ¿quedan más páginas?
+			int traidos = (offset + 1) * Configuracion.ninjaPagesize;
+			if (root.tc == null || traidos >= root.tc.intValue()) break;
+			offset++;
+		}
+
+		if (TelegramSender.eventosIniciales == 0) TelegramSender.eventosIniciales = lectura.size();
+		return lectura;
+	}
+
 	 public static StringBuilder crearPeticionData(String urlParameters, String urlConexion) {
 	    	StringBuilder response = new StringBuilder();
 	        try {
@@ -256,8 +450,8 @@ public class NinjaService {
 	            "Chrome/151.0.0.0 Safari/537.36");
 	        
 	        //TOKEN DE SESIÓN DE USUARIO NINJABET (bot.properties: NINJA_SESSION_TOKEN)
-	        if (Configuracion.NINJA_SESSION_TOKEN != null) {
-	        	conn.setRequestProperty("X-Session-Token", Configuracion.NINJA_SESSION_TOKEN);
+	        if (Configuracion.getNinjaSessionToken() != null) {
+	        	conn.setRequestProperty("X-Session-Token", Configuracion.getNinjaSessionToken());
 	        } else {
 	        	System.out.println("❌ Falta NINJA_SESSION_TOKEN en bot.properties: la petición a Ninjabet fallará");
 	        }
@@ -319,41 +513,43 @@ public class NinjaService {
 		}
 	 
 	    public static StringBuilder crearPeticionEvents(String name) throws IOException {
-	        // Montar parámetros POST
-	        String urlParameters = "name=" + URLEncoder.encode(name, "UTF-8");
+	        // Payload JSON del servicio nuevo: {"search_term": "...", "pids": [...]}
+	        ObjectMapper mapper = new ObjectMapper();
+	        ObjectNode payload = mapper.createObjectNode();
+	        payload.put("search_term", name);
+	        ArrayNode pids = payload.putArray("pids");
+	        for (Integer id : Configuracion.ninjaPids) pids.add(id);
+	        byte[] postData = mapper.writeValueAsBytes(payload);
 
-	        // Preparar la conexión
 	        URL url = new URL(Configuracion.urlEvents);
 	        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 	        conn.setRequestMethod("POST");
-
-	        // Headers principales
-	        conn.setRequestProperty("Accept", "application/json, text/javascript, */*; q=0.01");
-	        conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-	        conn.setRequestProperty("Origin", "https://www.ninjabet.es");
-	        conn.setRequestProperty("Referer", "https://www.ninjabet.es/oddsmatcher");
-	        conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36");
+	        conn.setRequestProperty("Content-Type", "application/json");
+	        conn.setRequestProperty("Accept", "*/*");
+	        conn.setRequestProperty("Origin", "https://ninjabet.es");
+	        conn.setRequestProperty("Referer", "https://ninjabet.es/");
 	        conn.setRequestProperty("X-Requested-With", "XMLHttpRequest");
-	        //conn.setRequestProperty("Cookie", cookies);
-
-	        // Permitir envío de datos
-	        conn.setDoOutput(true);
-
-	        // Enviar body POST
-	        try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream())) {
-	            wr.write(urlParameters.getBytes(StandardCharsets.UTF_8));
+	        conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36");
+	        if (Configuracion.getNinjaSessionToken() != null) {
+	        	conn.setRequestProperty("X-Session-Token", Configuracion.getNinjaSessionToken());
+	        } else {
+	        	System.out.println("❌ Falta NINJA_SESSION_TOKEN en bot.properties: la búsqueda de eventos fallará");
 	        }
 
-	        // Leer respuesta
+	        conn.setDoOutput(true);
+	        try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream())) {
+	            wr.write(postData);
+	        }
+
 	        int responseCode = conn.getResponseCode();
-	        
+	        Configuracion.actualizarNinjaSessionToken(conn.getHeaderField("x-session-token"));
 	        if(responseCode==200) {
 	        	TelegramSender.response200_Events++;
 	        } else {
 	        	TelegramSender.response403++;
 	        }
-	        
-	        InputStream inputStream = (responseCode == 200)
+
+	        InputStream inputStream = (responseCode >= 200 && responseCode < 300)
 	                ? conn.getInputStream()
 	                : conn.getErrorStream();
 
@@ -376,62 +572,47 @@ public class NinjaService {
 	    
 	    
 	    
-		public static Odd rellenaMejoresHome(Odd odd, String codigosEventos) throws Exception {
-			
-			ArrayList<Odd> lectura = new ArrayList<>();
-			
-			String urlParameters=NinjaService.crearUrlFiltroPeticionData(Configuracion.uid, Configuracion.filtroBookies2UP2WAY, "1", "1", Configuracion.filtroApuestasHome, codigosEventos);
-			lectura=NinjaService.mapearListaResultadosData(urlParameters, Configuracion.urlData, false);
-	    	lectura.sort(Comparator.comparingDouble(o -> Double.parseDouble(o.getBackOdd())));
-	    	Collections.reverse(lectura);
-			for (Odd o : lectura.subList(0, Math.min(4, lectura.size()))) {
-				odd.setEquipoHome(o.getSelection());
-				if(!o.getBookie().equals(odd.getBookie())) {
-					odd.getMejoresHome().add(o);	
-				}
-				
-			}
-			
-			
-			
-			return odd;
+	// true si la casa (p1) está en la lista configurada (local/visitante); el empate no filtra
+	private static boolean esCasaConfigurada(Odd o) {
+		try { return Configuracion.ninjaProvider1.contains(Integer.valueOf(o.getBookie())); }
+		catch (Exception e) { return false; }
+	}
 
+	// ===== Mejores cuotas por selección a partir de la lista ya descargada del evento =====
+	public static Odd rellenaMejoresHome(Odd odd, ArrayList<Odd> todas) {
+		java.util.ArrayList<Odd> home = new java.util.ArrayList<>();
+		for (Odd o : todas) if ("1".equals(o.getSelectionId()) && esCasaConfigurada(o)) home.add(o);
+		home.sort(Comparator.comparingDouble(o -> Double.parseDouble(o.getBackOdd())));
+		Collections.reverse(home);
+		for (Odd o : home.subList(0, Math.min(4, home.size()))) {
+			odd.setEquipoHome(o.getSelection());
+			if (!o.getBookie().equals(odd.getBookie())) odd.getMejoresHome().add(o);
 		}
+		return odd;
+	}
 
-		public static Odd rellenaMejoresDraw(Odd odd, String codigosEventos) throws Exception {
-			ArrayList<Odd> lectura = new ArrayList<>();
-			String urlParameters=NinjaService.crearUrlFiltroPeticionData(Configuracion.uid, Configuracion.filtroBookiesVacio, "1", "1", Configuracion.filtroApuestasDraw, codigosEventos);
-			lectura=NinjaService.mapearListaResultadosData(urlParameters, Configuracion.urlData, false);
-			lectura.sort(Comparator.comparingDouble(o -> Double.parseDouble(o.getBackOdd())));
-	    	Collections.reverse(lectura);
-	    	for (Odd o : lectura.subList(0, Math.min(4, lectura.size()))) {
-				
-				if(!o.getBookie().equals(odd.getBookie())) {
-					odd.getMejoresDraw().add(o);	
-				}
-				
-			}
-			
-			return odd;
+	public static Odd rellenaMejoresDraw(Odd odd, ArrayList<Odd> todas) {
+		java.util.ArrayList<Odd> draw = new java.util.ArrayList<>();
+		for (Odd o : todas) if ("3".equals(o.getSelectionId())) draw.add(o);
+		draw.sort(Comparator.comparingDouble(o -> Double.parseDouble(o.getBackOdd())));
+		Collections.reverse(draw);
+		for (Odd o : draw.subList(0, Math.min(4, draw.size()))) {
+			if (!o.getBookie().equals(odd.getBookie())) odd.getMejoresDraw().add(o);
 		}
+		return odd;
+	}
 
-		public static Odd rellenaMejoresAway(Odd odd, String codigosEventos) throws Exception {
-			
-			ArrayList<Odd> lectura = new ArrayList<>();
-						
-			String urlParameters=NinjaService.crearUrlFiltroPeticionData(Configuracion.uid, Configuracion.filtroBookies2UP2WAY, "1", "1", Configuracion.filtroApuestasAway, codigosEventos);
-			lectura=NinjaService.mapearListaResultadosData(urlParameters, Configuracion.urlData, false);
-			lectura.sort(Comparator.comparingDouble(o -> Double.parseDouble(o.getBackOdd())));
-	    	Collections.reverse(lectura);
-			for (Odd o : lectura.subList(0, Math.min(4, lectura.size()))) {
-				odd.setEquipoAway(o.getSelection());
-				if(!o.getBookie().equals(odd.getBookie())) {
-					odd.getMejoresAway().add(o);	
-				}
-			}
-				
-				return odd;
+	public static Odd rellenaMejoresAway(Odd odd, ArrayList<Odd> todas) {
+		java.util.ArrayList<Odd> away = new java.util.ArrayList<>();
+		for (Odd o : todas) if ("2".equals(o.getSelectionId()) && esCasaConfigurada(o)) away.add(o);
+		away.sort(Comparator.comparingDouble(o -> Double.parseDouble(o.getBackOdd())));
+		Collections.reverse(away);
+		for (Odd o : away.subList(0, Math.min(4, away.size()))) {
+			odd.setEquipoAway(o.getSelection());
+			if (!o.getBookie().equals(odd.getBookie())) odd.getMejoresAway().add(o);
 		}
+		return odd;
+	}
 
 		public static Odd rellenaDrawExchange(Odd odd, String marketId) throws Exception {
 
@@ -475,84 +656,169 @@ public class NinjaService {
 
 		
 		
-	    public static Odd rellenaCuotasTodas(Odd odd, String codigosEventos, String marketId) throws Exception {
-	    	
-	       	
-	    	List<Event> eventos=buscaEventos(odd.getEvent());
-	    	
-			if (codigosEventos == null || codigosEventos.isEmpty()) {
+	// ===== Cuotas de un evento concreto (oddsmatcher con filter_events) =====
+	// Convierte "e13398860,e13399493,..." en [13398860,13399493,...]
+	public static List<Long> parseEventIds(String csv) {
+		java.util.ArrayList<Long> ids = new java.util.ArrayList<>();
+		if (csv == null || csv.isEmpty()) return ids;
+		for (String t : csv.split(",")) {
+			String n = t.trim();
+			if (n.startsWith("e") || n.startsWith("E")) n = n.substring(1);
+			if (n.isEmpty()) continue;
+			try { ids.add(Long.valueOf(n)); } catch (NumberFormatException e) { /* ignorar */ }
+		}
+		return ids;
+	}
 
-				codigosEventos = "";
+	public static String crearPeticionOddsmatcherEvento(List<Long> eventIds, int offset) {
+		StringBuilder response = new StringBuilder();
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			ObjectNode payload = mapper.createObjectNode();
+			payload.put("bet_amount", Configuracion.ninjaBetAmount);
+			ArrayNode ex = payload.putArray("exchange_ids");
+			for (Integer id : Configuracion.ninjaExchangeIds) ex.add(id);
+			ArrayNode fe = payload.putArray("filter_events");
+			for (Long id : eventIds) fe.add(id);
+			payload.put("matcher_type", Configuracion.ninjaMatcherType);
+			payload.put("mode", Configuracion.ninjaMode);
+			payload.put("order_by", Configuracion.ninjaOrderBy);
+			payload.put("offset", offset);
+			payload.put("pagesize", Configuracion.ninjaPagesizeEvento);
+			ArrayNode pids = payload.putArray("pids");
+			for (Integer id : Configuracion.ninjaPids) pids.add(id);
+			byte[] postData = mapper.writeValueAsBytes(payload);
 
-				if (!eventos.isEmpty()) {
-					for (Event event : eventos) {
-						codigosEventos += event.getId() + ",";
+			URL obj = new URL(Configuracion.urlData);
+			HttpURLConnection conn = (HttpURLConnection) obj.openConnection();
+			conn.setRequestMethod("POST");
+			conn.setRequestProperty("Content-Type", "application/json");
+			conn.setRequestProperty("Accept", "*/*");
+			conn.setRequestProperty("Origin", "https://ninjabet.es");
+			conn.setRequestProperty("Referer", "https://ninjabet.es/");
+			conn.setRequestProperty("X-Requested-With", "XMLHttpRequest");
+			conn.setRequestProperty("User-Agent",
+				"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36");
+			if (Configuracion.getNinjaSessionToken() != null) {
+				conn.setRequestProperty("X-Session-Token", Configuracion.getNinjaSessionToken());
+			}
+			conn.setDoOutput(true);
+			try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream())) {
+				wr.write(postData);
+			}
+			int responseCode = conn.getResponseCode();
+			codeRespuesta = responseCode;
+			Configuracion.actualizarNinjaSessionToken(conn.getHeaderField("x-session-token"));
+			InputStream is = (responseCode >= 200 && responseCode < 300) ? conn.getInputStream() : conn.getErrorStream();
+			if (is != null) {
+				try (BufferedReader in = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+					String line;
+					while ((line = in.readLine()) != null) response.append(line);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			codeRespuesta = -1;
+		}
+		return response.toString();
+	}
+
+	// Descarga TODAS las cuotas (todas las casas y selecciones) de un evento y las mapea a Odd
+	public static ArrayList<Odd> leerOddsEvento(List<Long> eventIds) {
+		ArrayList<Odd> lista = new ArrayList<Odd>();
+		if (eventIds == null || eventIds.isEmpty()) return lista;
+		ObjectMapper mapper = new ObjectMapper();
+		int offset = 0;
+		while (offset < Configuracion.ninjaMaxPaginasEvento) {
+			String response = crearPeticionOddsmatcherEvento(eventIds, offset);
+			if (codeRespuesta == null || codeRespuesta.intValue() != 200) break;
+			NinjaRoot root;
+			try { root = mapper.readValue(response, NinjaRoot.class); }
+			catch (Exception e) { e.printStackTrace(); break; }
+			if (root == null || root.evs == null || root.evs.isEmpty()) break;
+
+			java.util.HashMap<Long, NinjaRoot.NinjaMd> partidos = new java.util.HashMap<>();
+			if (root.md != null) {
+				for (NinjaRoot.NinjaMd m : root.md) if (m.e1 != null) for (Long eid : m.e1) partidos.put(eid, m);
+			}
+
+			for (NinjaRoot.NinjaEv ev : root.evs) {
+				if (ev.s1 == null) continue;
+				NinjaRoot.NinjaMd m = (ev.e1 != null) ? partidos.get(ev.e1) : null;
+
+				Odd odd = new Odd();
+				odd.setTipoOdd("N");
+				odd.setBookie(String.valueOf(ev.p1));
+				odd.setRating(String.valueOf(ev.rt1));
+				odd.setRatingOriginal(String.valueOf(ev.rt1));
+				odd.setBackOdd(String.valueOf(ev.o1));
+				odd.setBackOddOriginal(String.valueOf(ev.o1));
+				odd.setLayOdd(ev.o2 != null ? String.valueOf(ev.o2) : "0");
+				odd.setSelectionId(String.valueOf(ev.s1));
+				odd.setMarket_id(ev.mk);
+				odd.setUpdate_time(ev.ut);
+				if (m != null) {
+					odd.setEvent(m.ev);
+					odd.setCompetition(m.cm);
+					odd.setCountry(m.ct);
+					String sel = String.valueOf(ev.s1);
+					if (m.ev != null && m.ev.contains(" v ")) {
+						String[] pr = m.ev.split(" v ");
+						if (ev.s1 == 1) sel = pr[0].trim();
+						else if (ev.s1 == 2 && pr.length > 1) sel = pr[1].trim();
+						else if (ev.s1 == 3) sel = "empate";
 					}
+					odd.setSelection(sel);
+					try {
+						LocalDateTime f = LocalDateTime.parse(m.st);
+						odd.setFechaPartido(f);
+						odd.setsFechaPartido(f.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+					} catch (Exception e) { /* sin fecha */ }
+				}
+				odd = OddUtils.ajustaCuotaRating(odd);
+				lista.add(odd);
+			}
 
-					codigosEventos = codigosEventos.substring(0, codigosEventos.length() - 1);
-				}
+			int traidos = (offset + 1) * Configuracion.ninjaPagesizeEvento;
+			if (root.tc == null || traidos >= root.tc.intValue()) break;
+			offset++;
+		}
+		return lista;
+	}
 
-			}
-			odd=rellenaMejoresHome(odd, codigosEventos);
-			
-			if(odd.getMejoresHome()==null || odd.getMejoresHome().isEmpty()) {
-				return odd;
-			}
-			
-			if (marketId == null || marketId.isEmpty()) {
-				marketId=odd.getMejoresHome().get(0).getMarket_id();
-			} 
-			
-			odd=rellenaMejoresDraw(odd, codigosEventos);			
-		
-			odd=rellenaDrawExchange(odd, marketId);
-			
-			odd=rellenaMejoresAway(odd, codigosEventos);
-					
-	    	
-	    	return odd;
-	    }
-	    
-	    public static Odd rellenaCuotasSoloHome(Odd odd) throws Exception {
-	    	
-	       	
-	    	List<Event> eventos=buscaEventos(odd.getEvent());
-	    	
-	    	String codigosEventos="";
-	    	
-			if (!eventos.isEmpty()) {
-				for (Event event : eventos) {
-					codigosEventos += event.getId() + ",";
-				}
-				
-				codigosEventos=codigosEventos.substring(0, codigosEventos.length() - 1);
-			}
-			
-			odd=rellenaMejoresHome(odd, codigosEventos);
-			    	
-	    	return odd;
-	    }
-	    
-	    public static Odd rellenaCuotasSoloAway(Odd odd) throws Exception {
-	    	
-	       	
-	    	List<Event> eventos=buscaEventos(odd.getEvent());
-	    	
-	    	String codigosEventos="";
-	    	
-			if (!eventos.isEmpty()) {
-				for (Event event : eventos) {
-					codigosEventos += event.getId() + ",";
-				}
-				
-				codigosEventos=codigosEventos.substring(0, codigosEventos.length() - 1);
-			}
-			
-			odd=rellenaMejoresAway(odd, codigosEventos);
-					
-	    	
-	    	return odd;
-	    }
-		
-		
+	public static Odd rellenaCuotasTodas(Odd odd, String codigosEventos, String marketId) throws Exception {
+		if (codigosEventos == null || codigosEventos.isEmpty()) {
+			List<Event> eventos = buscaEventos(odd.getEvent());
+			StringBuilder sb = new StringBuilder();
+			for (Event e : eventos) sb.append(e.getId()).append(",");
+			codigosEventos = sb.length() > 0 ? sb.substring(0, sb.length() - 1) : "";
+		}
+		ArrayList<Odd> todas = leerOddsEvento(parseEventIds(codigosEventos));
+		odd = rellenaMejoresHome(odd, todas);
+		if (odd.getMejoresHome() == null || odd.getMejoresHome().isEmpty()) return odd;
+		if (marketId == null || marketId.isEmpty()) marketId = odd.getMejoresHome().get(0).getMarket_id();
+		odd = rellenaMejoresDraw(odd, todas);
+		odd = rellenaDrawExchange(odd, marketId);
+		odd = rellenaMejoresAway(odd, todas);
+		return odd;
+	}
+
+	public static Odd rellenaCuotasSoloHome(Odd odd) throws Exception {
+		List<Event> eventos = buscaEventos(odd.getEvent());
+		StringBuilder sb = new StringBuilder();
+		for (Event e : eventos) sb.append(e.getId()).append(",");
+		String cod = sb.length() > 0 ? sb.substring(0, sb.length() - 1) : "";
+		ArrayList<Odd> todas = leerOddsEvento(parseEventIds(cod));
+		return rellenaMejoresHome(odd, todas);
+	}
+
+	public static Odd rellenaCuotasSoloAway(Odd odd) throws Exception {
+		List<Event> eventos = buscaEventos(odd.getEvent());
+		StringBuilder sb = new StringBuilder();
+		for (Event e : eventos) sb.append(e.getId()).append(",");
+		String cod = sb.length() > 0 ? sb.substring(0, sb.length() - 1) : "";
+		ArrayList<Odd> todas = leerOddsEvento(parseEventIds(cod));
+		return rellenaMejoresAway(odd, todas);
+	}
+
 }

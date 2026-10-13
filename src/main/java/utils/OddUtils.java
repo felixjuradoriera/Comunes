@@ -12,8 +12,8 @@ public class OddUtils {
     public static Odd ajustaCuotaRating(Odd odd) {
     	
 		
-		if((odd.getBookie().equals("39") || odd.getBookie().equals("20")|| odd.getBookie().equals("57") || odd.getBookie().equals("104")) && !odd.getSelection().equalsIgnoreCase("empate")) {
-		System.out.println("AJUSTE CUOTA CODERE--> cuota Back: " + odd.getBackOdd() + "   rating: " + odd.getRating() + " cuota Lay: " + odd.getLayOdd() );
+		if((odd.getBookie().equals("37") || odd.getBookie().equals("107")|| odd.getBookie().equals("145") || odd.getBookie().equals("43")) && !odd.getSelection().equalsIgnoreCase("empate")) {
+		System.out.println("AJUSTE CUOTA "+ AlertasFactory.getNombreBookie(odd.getBookie()) +"--> cuota Back: " + odd.getBackOdd() + "   rating: " + odd.getRating() + " cuota Lay: " + odd.getLayOdd() );
 		Double cuotaBack=Double.valueOf(odd.getBackOdd());
 		Double cuotaLay=Double.valueOf(odd.getLayOdd());
 		
@@ -34,11 +34,11 @@ public class OddUtils {
 		
 		odd.setBackOdd(cuotaBackReducida.toString());
 		odd.setRating(nuevoRatingRedondeado.toString());
-		System.out.println("AJUSTE CUOTA CODERE--> Nueva cuota Back: " + odd.getBackOdd() + "  nuevo rating: " + odd.getRating() );
+		System.out.println("AJUSTE CUOTA "+ AlertasFactory.getNombreBookie(odd.getBookie()) +"--> Nueva cuota Back: " + odd.getBackOdd() + "  nuevo rating: " + odd.getRating() );
 	
 		}
 		
-		if(odd.getBookie().equals("2") && odd.getSelection().equalsIgnoreCase("empate")) {
+		if(odd.getBookie().equals("3") && odd.getSelection().equalsIgnoreCase("empate")) {
 			
 			Double cuotaBack=Double.valueOf(odd.getBackOdd());
 			Double cuotaAumentada=cuotaBack * 1.04;

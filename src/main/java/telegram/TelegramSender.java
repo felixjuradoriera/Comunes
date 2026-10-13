@@ -166,10 +166,21 @@ public class TelegramSender {
     }
 
     public static void sendTelegramMessageVigilante() {
+    	sendTelegramMessageVigilante(null);
+    }
+
+    public static void sendTelegramMessageVigilante(Integer httpCode) {
     	StringBuilder mensajeDebug = new StringBuilder();
     	mensajeDebug.append("<b>Debug Ejecucion</b>\n");
-    	mensajeDebug.append("Peticiones HTTP403:  <b>").append("1").append("</b>\n");
-    	mensajeDebug.append("<b>Probable caída de la VPN. Avisar").append("</b>\n");
+    	if (httpCode != null && (httpCode == 401 || httpCode == 403)) {
+    		mensajeDebug.append("🔑 <b>Token de sesión Ninjabet caducado o inválido (HTTP ").append(httpCode).append(")</b>\n");
+    		mensajeDebug.append("Renueva NINJA_SESSION_TOKEN en bot.properties\n");
+    	} else if (httpCode != null && httpCode > 0) {
+    		mensajeDebug.append("⚠️ <b>Respuesta inesperada de Ninjabet (HTTP ").append(httpCode).append(")</b>\n");
+    	} else {
+    		mensajeDebug.append("Peticiones HTTP403:  <b>").append("1").append("</b>\n");
+    		mensajeDebug.append("<b>Probable caída de la VPN. Avisar").append("</b>\n");
+    	}
     	String text=mensajeDebug.toString();
 
     	for (String chatId : Configuracion.CHAT_IDS_VIGILANTE) {
